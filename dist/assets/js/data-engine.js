@@ -34,8 +34,8 @@ class DataEngine {
         // Full Liga MX Clausura 2026 Calendar (Sync with FotMob)
         this.LIGA_CALENDAR = [
             {
-                id: 14,
-                name: "JORNADA 14",
+                id: 13,
+                name: "JORNADA 13",
                 endDate: "2026-04-06T23:59:59",
                 startDate: "2026-04-03T20:00:00",
                 matches: [
@@ -51,8 +51,8 @@ class DataEngine {
                 ]
             },
             {
-                id: 15,
-                name: "JORNADA 15",
+                id: 14,
+                name: "JORNADA 14",
                 endDate: "2026-04-13T23:59:59",
                 startDate: "2026-04-10T20:00:00",
                 matches: [
