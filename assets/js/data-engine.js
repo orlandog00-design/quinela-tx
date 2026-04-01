@@ -8,78 +8,63 @@ class DataEngine {
         // ... (existing spreadsheet URL)
         this.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMObz19KSMXtEAcdhQzfXb8yPcMLPDjKwZjy0PyC15coaU2JLD--RwVFMoXH1BuMvc_htUoVtHos2a/pub?output=csv";
         
-        // Official Liga MX Team Logos
+        // Official Liga MX Team Logos (FotMob CDN - High Reliability)
+        const logoBase = "https://images.fotmob.com/image_resources/logo/teamlogo/";
         this.TEAM_LOGOS = {
-            "América": "https://img.vavel.com/club-america-logo-1.png",
-            "Chivas": "https://img.vavel.com/chivas-guadalajara-logo.png",
-            "Cruz Azul": "https://img.vavel.com/cruz-azul-logo.png",
-            "Pumas": "https://img.vavel.com/pumas-unam-logo.png",
-            "Tigres": "https://img.vavel.com/tigres-uanl-logo.png",
-            "Monterrey": "https://img.vavel.com/monterrey-rayados-logo.png",
-            "Toluca": "https://img.vavel.com/toluca-fc-logo.png",
-            "Pachuca": "https://img.vavel.com/pachuca-cf-logo.png",
-            "León": "https://img.vavel.com/club-leon-logo.png",
-            "Santos": "https://img.vavel.com/santos-laguna-logo.png",
-            "Atlas": "https://img.vavel.com/atlas-fc-logo.png",
-            "Necaxa": "https://img.vavel.com/club-necaxa-logo.png",
-            "Juárez": "https://img.vavel.com/fc-juarez-logo.png",
-            "Mazatlán": "https://img.vavel.com/mazatlan-fc-logo.png",
-            "Tijuana": "https://img.vavel.com/club-tijuana-xolos-logo.png",
-            "Puebla": "https://img.vavel.com/puebla-fc-logo.png",
-            "Querétaro": "https://img.vavel.com/queretaro-fc-logo.png",
-            "Atlético San Luis": "https://img.vavel.com/atletico-san-luis-logo.png"
+            "América": `${logoBase}6576.png`,
+            "Chivas": `${logoBase}7807.png`,
+            "Cruz Azul": `${logoBase}6578.png`,
+            "Pumas": `${logoBase}1946.png`,
+            "Tigres": `${logoBase}8561.png`,
+            "Monterrey": `${logoBase}7849.png`,
+            "Toluca": `${logoBase}6618.png`,
+            "Pachuca": `${logoBase}7848.png`,
+            "León": `${logoBase}1841.png`,
+            "Santos": `${logoBase}7857.png`,
+            "Atlas": `${logoBase}6577.png`,
+            "Necaxa": `${logoBase}1842.png`,
+            "Juárez": `${logoBase}649424.png`,
+            "Mazatlán": `${logoBase}1170234.png`,
+            "Tijuana": `${logoBase}162418.png`,
+            "Puebla": `${logoBase}7847.png`,
+            "Querétaro": `${logoBase}1943.png`,
+            "Atlético San Luis": `${logoBase}6358.png`
         };
 
-        // Full Liga MX Clausura 2025 Calendar
+        // Full Liga MX Clausura 2026 Calendar (Sync with FotMob)
         this.LIGA_CALENDAR = [
-            {
-                id: 13,
-                name: "JORNADA 13",
-                endDate: "2026-03-31T23:59:59",
-                matches: [
-                    { local: "Puebla", visita: "Tigres" },
-                    { local: "América", visita: "Atlético San Luis" },
-                    { local: "Mazatlán", visita: "Tijuana" },
-                    { local: "Pachuca", visita: "Toluca" },
-                    { local: "Monterrey", visita: "Chivas" },
-                    { local: "Pumas", visita: "Cruz Azul" },
-                    { local: "Atlas", visita: "Querétaro" },
-                    { local: "Necaxa", visita: "León" },
-                    { local: "Juárez", visita: "Santos" }
-                ]
-            },
             {
                 id: 14,
                 name: "JORNADA 14",
                 endDate: "2026-04-06T23:59:59",
-                startDate: "2026-04-04T19:00:00",
+                startDate: "2026-04-03T20:00:00",
                 matches: [
-                    { local: "Querétaro", visita: "León" },
-                    { local: "Tijuana", visita: "Necaxa" },
-                    { local: "Puebla", visita: "Tigres" },
-                    { local: "Atlas", visita: "Juárez" },
-                    { local: "Pachuca", visita: "América" },
-                    { local: "Monterrey", visita: "Chivas" },
-                    { local: "Cruz Azul", visita: "Pumas" },
-                    { local: "Toluca", visita: "Santos" },
-                    { local: "Atlético San Luis", visita: "Mazatlán" }
+                    { local: "Puebla", visita: "Juárez" },
+                    { local: "Necaxa", visita: "Mazatlán" },
+                    { local: "Tijuana", visita: "Tigres" },
+                    { local: "Monterrey", visita: "Atlético San Luis" },
+                    { local: "Querétaro", visita: "Toluca" },
+                    { local: "Cruz Azul", visita: "Pachuca" },
+                    { local: "León", visita: "Atlas" },
+                    { local: "Santos", visita: "América" },
+                    { local: "Chivas", visita: "Pumas" }
                 ]
             },
             {
                 id: 15,
                 name: "JORNADA 15",
-                endDate: "2026-04-14T23:59:59",
-                startDate: "2026-04-11T19:00:00",
+                endDate: "2026-04-13T23:59:59",
+                startDate: "2026-04-10T20:00:00",
                 matches: [
-                    { local: "Necaxa", visita: "Pachuca" },
-                    { local: "Mazatlán", visita: "Chivas" },
-                    { local: "Pumas", visita: "Juárez" },
-                    { local: "León", visita: "Puebla" },
-                    { local: "Atlas", visita: "Toluca" },
-                    { local: "Tigres", visita: "Monterrey" },
+                    { local: "Puebla", visita: "León" },
+                    { local: "Juárez", visita: "Tijuana" },
+                    { local: "Querétaro", visita: "Necaxa" },
+                    { local: "Tigres", visita: "Chivas" },
+                    { local: "Atlas", visita: "Monterrey" },
+                    { local: "Pachuca", visita: "Santos" },
                     { local: "América", visita: "Cruz Azul" },
-                    { local: "Santos", visita: "Querétaro" },
-                    { local: "Atlético San Luis", visita: "Tijuana" }
+                    { local: "Pumas", visita: "Mazatlán" },
+                    { local: "Toluca", visita: "Atlético San Luis" }
                 ]
             }
         ];
