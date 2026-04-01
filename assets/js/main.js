@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DYNAMIC MATCH ENGINE (ULTIMATE AUTOMATION) ---
     const matchList = document.getElementById('match-list');
     const jornadaDisplay = document.getElementById('jornada-display');
+    const regIniciaDisplay = document.getElementById('reg-inicia');
+    const regCierreDisplay = document.getElementById('reg-cierre');
     
     // Get the active Jornada based on today's date (April 1st)
     const activeJornada = engine.getActiveJornada();
@@ -12,8 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!matchList) return;
         matchList.innerHTML = "";
         
-        // Update header
+        // Update header & windows
         if (jornadaDisplay) jornadaDisplay.textContent = activeJornada.name;
+        if (regIniciaDisplay) regIniciaDisplay.textContent = activeJornada.inicia || "--/--/----";
+        if (regCierreDisplay) regCierreDisplay.textContent = activeJornada.cierre || "--/--/----";
         
         matches.forEach(match => {
             const row = document.createElement('tr');
