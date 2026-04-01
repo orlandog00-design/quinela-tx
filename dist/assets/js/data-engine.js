@@ -5,8 +5,11 @@
  */
 class DataEngine {
     constructor() {
-        // ... (existing spreadsheet URL)
+        // Read URL (CSV)
         this.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMObz19KSMXtEAcdhQzfXb8yPcMLPDjKwZjy0PyC15coaU2JLD--RwVFMoXH1BuMvc_htUoVtHos2a/pub?output=csv";
+        
+        // Write URL (Google Apps Script - Mandatory for Registration)
+        this.scriptUrl = "https://script.google.com/macros/s/AKfycbywJeMQcBb-b54z7IDL65v3CYNHFnk6PmeWKGH9wUg9PtSssRgf1CrxkatrPPx4MpOV/exec";
         
         // Official Liga MX Team Logos (FotMob CDN - High Reliability)
         const logoBase = "https://images.fotmob.com/image_resources/logo/teamlogo/";
@@ -153,17 +156,24 @@ class DataEngine {
 
     async registerParticipant(data) {
         try {
-            // Default status is PAGADO as per user request
+            // Mapping for the Google Apps Script: "poblacion" is used for the phone column
             const payload = {
-                ...data,
+                nombre: data.nombre,
+                predicciones: data.predicciones,
+                poblacion: data.telefono,  
+                metodo_pago: data.metodo_pago || "NONE",
                 status: "PAGADO"
             };
             
-            const response = await fetch(this.url, {
+            // Note: Google Apps Script requires no-cors for simple browser POSTs
+            await fetch(this.scriptUrl, {
                 method: "POST",
+                mode: "no-cors", 
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
-            return response.ok;
+            
+            return true; // We always return true for no-cors as it won't show response.ok
         } catch (error) {
             console.error("Error registering participant:", error);
             return false;
