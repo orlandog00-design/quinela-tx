@@ -38,49 +38,50 @@
     </div>
 </section>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const dummyData = [
-            { nombre: "Tino Gutiérrez", picks: "L-V-L-E-L-V-L-L-V", status: "PAGADA", date: "01 Abr 2026", celular: "12345678" },
-            { nombre: "Orlando G-00", picks: "E-V-L-L-L-V-E-L-V", status: "PENDIENTE", date: "31 Mar 2026", celular: "87654321" }
-        ];
+    <!-- Include the data engine -->
+    <script src="assets/js/data-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('verify-search');
+            const searchBtn = document.getElementById('verify-btn');
+            const resultsDiv = document.getElementById('verify-results');
+            const noResultsDiv = document.getElementById('no-results');
 
-        const searchInput = document.getElementById('verify-search');
-        const searchBtn = document.getElementById('verify-btn');
-        const resultsDiv = document.getElementById('verify-results');
-        const noResultsDiv = document.getElementById('no-results');
+            async function doSearch() {
+                const query = searchInput.value.toLowerCase();
+                if (!query) return;
 
-        function doSearch() {
-            const query = searchInput.value.toLowerCase();
-            if (!query) return;
+                // Fetch latest data from Google Sheets
+                const data = await engine.fetchData();
+                if (!data) return;
 
-            const found = dummyData.find(d => 
-                d.nombre.toLowerCase().includes(query) || 
-                d.celular.includes(query)
-            );
+                const found = engine.search(query)[0]; // Get first match
 
-            if (found) {
-                document.getElementById('verify-name').textContent = found.nombre;
-                document.getElementById('verify-status').textContent = found.status;
-                document.getElementById('verify-date').textContent = found.date;
-                document.getElementById('verify-picks').textContent = found.picks;
-                
-                // Color status correctly
-                const statusEl = document.getElementById('verify-status');
-                statusEl.style.color = found.status === 'PAGADA' ? '#00f5ff' : '#ff00ff';
-                
-                resultsDiv.style.display = 'block';
-                noResultsDiv.style.display = 'none';
-            } else {
-                resultsDiv.style.display = 'none';
-                noResultsDiv.style.display = 'block';
+                if (found) {
+                    document.getElementById('verify-name').textContent = found.nombre || "---";
+                    
+                    // Logic for status: if they have PTS or are in the sheet, they are verified
+                    const isPaid = found.pts !== undefined && found.pts !== "";
+                    document.getElementById('verify-status').textContent = isPaid ? 'PAGADA' : 'PENDIENTE';
+                    document.getElementById('verify-date').textContent = 'Jornada 13';
+                    document.getElementById('verify-picks').textContent = found.predicciones || "---";
+                    
+                    // Color status correctly
+                    const statusEl = document.getElementById('verify-status');
+                    statusEl.style.color = isPaid ? '#00f5ff' : '#ff00ff';
+                    
+                    resultsDiv.style.display = 'block';
+                    noResultsDiv.style.display = 'none';
+                } else {
+                    resultsDiv.style.display = 'none';
+                    noResultsDiv.style.display = 'block';
+                }
             }
-        }
 
-        searchBtn.addEventListener('click', doSearch);
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') doSearch();
+            searchBtn.addEventListener('click', doSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') doSearch();
+            });
         });
-    });
-</script>
+    </script>
 </main>

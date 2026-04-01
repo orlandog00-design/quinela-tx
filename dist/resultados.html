@@ -55,46 +55,43 @@
     </table>
 </section>
 
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Initialize the data engine with a test sheet/placeholder
-        // In a real scenario, the user replaces this ID
-        const SHEET_ID = '1Z234567890abcdefghijklmnopqrstuvwxyz'; 
-        
-        // DUMMY DATA FOR PREVIEW if fetch fails or is placeholder
-        const dummyData = [
-            { nombre: "Tino Gutiérrez", predicciones: "L-V-L-E-L-V-L-L-V", pts: "12" },
-            { nombre: "Orlando G-00", predicciones: "E-V-L-L-L-V-E-L-V", pts: "10" },
-            { nombre: "Capitán DATA", predicciones: "L-L-L-L-L-L-L-L-L", pts: "8" }
-        ];
+    <!-- Include the data engine -->
+    <script src="assets/js/data-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const tableBody = document.querySelector('#results-table tbody');
+            const searchInput = document.getElementById('result-search');
 
-        const tableBody = document.querySelector('#results-table tbody');
-        
-        function renderTable(data) {
-            tableBody.innerHTML = '';
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="team-name">${item.nombre}</td>
-                    <td style="font-family: monospace; letter-spacing: 1px; color: var(--text-muted);">${item.predicciones}</td>
-                    <td style="text-align: center; color: var(--secondary-magenta); font-weight: 800; font-size: 1.2rem;">${item.pts}</td>
-                `;
-                tableBody.appendChild(row);
+            async function refreshTable(query = "") {
+                const results = await engine.fetchData();
+                if (!results) {
+                    tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--secondary-magenta);">Error al conectar con la base de datos.</td></tr>';
+                    return;
+                }
+
+                const filtered = engine.search(query);
+                tableBody.innerHTML = '';
+                
+                filtered.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="team-name">${item.nombre || "---"}</td>
+                        <td style="font-family: monospace; letter-spacing: 1px; color: var(--text-muted);">${item.predicciones || "---"}</td>
+                        <td style="text-align: center; color: var(--secondary-magenta); font-weight: 800; font-size: 1.2rem;">${item.pts || "0"}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // Initial load
+            await refreshTable();
+
+            // Search logic
+            searchInput.addEventListener('input', async (e) => {
+                await refreshTable(e.target.value);
             });
-        }
-
-        // Show dummy data for now to demonstrate the look
-        setTimeout(() => renderTable(dummyData), 500);
-
-        // Search logic
-        const searchInput = document.getElementById('result-search');
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = dummyData.filter(d => d.nombre.toLowerCase().includes(query));
-            renderTable(filtered);
         });
-    });
-</script>
+    </script>
     </main>
 
     <!-- assets/partials/footer.html -->

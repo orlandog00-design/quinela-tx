@@ -4,9 +4,9 @@
  * DataEngine handles fetching and searching of Quiniela results from Google Sheets.
  */
 class DataEngine {
-    constructor(sheetId) {
-        // Convert a regular Google Sheet URL to a CSV export URL
-        this.url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+    constructor() {
+        // The user's published Google Sheet CSV URL
+        this.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMObz19KSMXtEAcdhQzfXb8yPcMLPDjKwZjy0PyC15coaU2JLD--RwVFMoXH1BuMvc_htUoVtHos2a/pub?output=csv";
         this.data = [];
     }
 
@@ -14,6 +14,7 @@ class DataEngine {
         try {
             console.log("Fetching results from Google Sheets...");
             const response = await fetch(this.url);
+            if (!response.ok) throw new Error("Failed to fetch data from Google Sheets.");
             const csvText = await response.text();
             this.data = this.parseCSV(csvText);
             return this.data;
@@ -24,14 +25,16 @@ class DataEngine {
     }
 
     parseCSV(csvText) {
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',');
+        const lines = csvText.trim().split('\n');
+        if (lines.length === 0) return [];
+
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
         
         return lines.slice(1).map(line => {
             const values = line.split(',');
             const entry = {};
             headers.forEach((header, i) => {
-                entry[header.trim().toLowerCase()] = values[i] ? values[i].trim() : "";
+                entry[header] = values[i] ? values[i].trim() : "";
             });
             return entry;
         });
@@ -42,11 +45,10 @@ class DataEngine {
         const lowerQuery = query.toLowerCase();
         return this.data.filter(item => 
             (item.nombre && item.nombre.toLowerCase().includes(lowerQuery)) ||
-            (item.celular && item.celular.includes(lowerQuery))
+            (item.predicciones && item.predicciones.toLowerCase().includes(lowerQuery))
         );
     }
 }
 
-// Example usage and initialization
-const SHEET_ID = '1Z234567890abcdefghijklmnopqrstuvwxyz'; // PLACEHOLDER
-const engine = new DataEngine(SHEET_ID);
+// Initialize the data engine with the user's live Google Sheet
+const engine = new DataEngine();
