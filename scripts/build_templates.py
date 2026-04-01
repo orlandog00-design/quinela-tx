@@ -64,9 +64,8 @@ def main():
     html_files = [p for p in ROOT.glob('*.html') if p.name not in ['template.html']]
     
     out_dir = ROOT / 'dist'
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
-    out_dir.mkdir(parents=True)
+    if not out_dir.exists():
+        out_dir.mkdir(parents=True)
 
     print(f"Generando {len(html_files)} páginas en el directorio '{out_dir}'...")
 
