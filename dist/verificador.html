@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERIFICADOR | SPORTS KING QUINIELA | Sports King</title>
+    <meta name="description" content="Participa en la mejor quiniela de la Liga MX. Elige tus favoritos y gana premios increíbles.">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- assets/partials/header.html -->
+<header>
+    <div class="logo">SPORTS KING</div>
+    <nav>
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="#registro">Registro</a></li>
+            <li><a href="resultados.html">Resultados</a></li>
+            <li><a href="verificador.html">Verificador</a></li>
+        </ul>
+    </nav>
+</header>
+
+
+    <main>
+        <section class="hero" style="padding: 4rem 1rem;">
+    <h1>VERIFICADOR DE QUINIELA</h1>
+    <p style="margin-top: 1rem; color: var(--text-muted);">Ingresa tu nombre o número de celular para verificar el estado de tu registro.</p>
+</section>
+
+<section class="form-section">
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+        <input type="text" id="verify-search" placeholder="Nombre o Celular..." style="margin-bottom: 0;">
+        <button class="btn-primary" id="verify-btn" style="width: auto; padding: 0 2rem;">BUSCAR</button>
+    </div>
+
+    <div id="verify-results" style="display: none;">
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 12px; text-align: left;">
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">REGISTRO ENCONTRADO:</p>
+            <h3 id="verify-name" style="color: var(--primary-neon); margin-bottom: 1rem;">---</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted);">Estatus</p>
+                    <p id="verify-status" style="font-weight: 800; color: var(--primary-neon);">PAGADA</p>
+                </div>
+                <div>
+                    <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted);">Fecha</p>
+                    <p id="verify-date" style="font-weight: 800;">01/04/2026</p>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Predicciones (L-E-V):</p>
+            <p id="verify-picks" style="font-family: monospace; font-size: 1.2rem; letter-spacing: 2px; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px; text-align: center; border: 1px solid var(--glass-border);">---</p>
+        </div>
+    </div>
+
+    <div id="no-results" style="display: none; padding: 2rem; color: var(--secondary-magenta);">
+        <p>No se encontró ningún registro con ese nombre o número. Verifica que esté bien escrito o regístrate si no lo has hecho.</p>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dummyData = [
+            { nombre: "Tino Gutiérrez", picks: "L-V-L-E-L-V-L-L-V", status: "PAGADA", date: "01 Abr 2026", celular: "12345678" },
+            { nombre: "Orlando G-00", picks: "E-V-L-L-L-V-E-L-V", status: "PENDIENTE", date: "31 Mar 2026", celular: "87654321" }
+        ];
+
+        const searchInput = document.getElementById('verify-search');
+        const searchBtn = document.getElementById('verify-btn');
+        const resultsDiv = document.getElementById('verify-results');
+        const noResultsDiv = document.getElementById('no-results');
+
+        function doSearch() {
+            const query = searchInput.value.toLowerCase();
+            if (!query) return;
+
+            const found = dummyData.find(d => 
+                d.nombre.toLowerCase().includes(query) || 
+                d.celular.includes(query)
+            );
+
+            if (found) {
+                document.getElementById('verify-name').textContent = found.nombre;
+                document.getElementById('verify-status').textContent = found.status;
+                document.getElementById('verify-date').textContent = found.date;
+                document.getElementById('verify-picks').textContent = found.picks;
+                
+                // Color status correctly
+                const statusEl = document.getElementById('verify-status');
+                statusEl.style.color = found.status === 'PAGADA' ? '#00f5ff' : '#ff00ff';
+                
+                resultsDiv.style.display = 'block';
+                noResultsDiv.style.display = 'none';
+            } else {
+                resultsDiv.style.display = 'none';
+                noResultsDiv.style.display = 'block';
+            }
+        }
+
+        searchBtn.addEventListener('click', doSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') doSearch();
+        });
+    });
+</script>
+    </main>
+
+    <!-- assets/partials/footer.html -->
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2026 QUINIELA-TX | Desarrollado por CapitánDATA</p>
+        <p>Participa y demuestra tus conocimientos en la Liga MX.</p>
+        <div class="social-links" style="margin-top: 1rem;">
+            <a href="#" style="color: var(--primary-neon); margin: 0 10px; text-decoration: none;">Facebook</a> | 
+            <a href="#" style="color: var(--primary-neon); margin: 0 10px; text-decoration: none;">WhatsApp</a> |
+            <a href="admin.html" style="color: var(--text-muted); margin: 0 10px; text-decoration: none;">Admin</a>
+        </div>
+    </div>
+</footer>
+
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!-- resultados.html -->
+<title>RESULTADOS | LIGA MX JORNADA 13</title>
+
+<main>
+<section class="hero" style="padding: 4rem 1rem;">
+    <h1>RESULTADOS OFICIALES</h1>
+    <h3>LIGA MX | JORNADA 13</h3>
+    <p style="margin-top: 1rem; color: var(--text-muted);">Consulta la tabla general y los puntos acumulados de todos los participantes validados.</p>
+</section>
+
+<section class="match-table-container">
+    <div style="margin-bottom: 2rem; display: flex; gap: 1rem;">
+        <input type="text" id="result-search" placeholder="Buscar por nombre o celular..." style="margin-bottom: 0;">
+        <button class="btn-primary" style="width: auto; padding: 0 2rem;">BUSCAR</button>
+    </div>
+
+    <table id="results-table">
+        <thead>
+            <tr>
+                <th>PARTICIPANTE</th>
+                <th>PREDICCIONES (J13)</th>
+                <th style="text-align: center;">PTS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be injected here by JS -->
+            <tr id="loading-row">
+                <td colspan="3" style="text-align: center; color: var(--primary-neon);">Cargando resultados desde Google Sheets...</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Initialize the data engine with a test sheet/placeholder
+        // In a real scenario, the user replaces this ID
+        const SHEET_ID = '1Z234567890abcdefghijklmnopqrstuvwxyz'; 
+        
+        // DUMMY DATA FOR PREVIEW if fetch fails or is placeholder
+        const dummyData = [
+            { nombre: "Tino Gutiérrez", predicciones: "L-V-L-E-L-V-L-L-V", pts: "12" },
+            { nombre: "Orlando G-00", predicciones: "E-V-L-L-L-V-E-L-V", pts: "10" },
+            { nombre: "Capitán DATA", predicciones: "L-L-L-L-L-L-L-L-L", pts: "8" }
+        ];
+
+        const tableBody = document.querySelector('#results-table tbody');
+        
+        function renderTable(data) {
+            tableBody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="team-name">${item.nombre}</td>
+                    <td style="font-family: monospace; letter-spacing: 1px; color: var(--text-muted);">${item.predicciones}</td>
+                    <td style="text-align: center; color: var(--secondary-magenta); font-weight: 800; font-size: 1.2rem;">${item.pts}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Show dummy data for now to demonstrate the look
+        setTimeout(() => renderTable(dummyData), 500);
+
+        // Search logic
+        const searchInput = document.getElementById('result-search');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = dummyData.filter(d => d.nombre.toLowerCase().includes(query));
+            renderTable(filtered);
+        });
+    });
+</script>
+</main>

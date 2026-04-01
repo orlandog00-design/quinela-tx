@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Simple Countdown (Hardcoded for demo, would be dynamic)
     const countdownElement = document.getElementById('countdown');
     if (countdownElement) {
-        let totalSeconds = (4 * 24 * 3600) + (12 * 3600) + (45 * 60) + 30;
+        let totalSeconds = (4 * 24 * 3600) + (12 * 3600) + (44 * 60) + 27;
 
         function updateCountdown() {
             const days = Math.floor(totalSeconds / (24 * 3600));
@@ -48,12 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let choices = "";
             rows.forEach((row, index) => {
                 const active = row.querySelector('.choice-box.active');
-                choices += `${index + 1}: ${active ? active.textContent : '?'} | `;
+                choices += (active ? active.textContent : '?');
+                if (index < rows.length - 1) choices += "-";
             });
 
-            const message = `Hola, mi nombre es ${name}. Mis predicciones para la Jornada 13 son: ${choices}`;
+            const message = `*SPORTS KING QUINIELA*\n*Nombre:* ${name}\n*Predicciones (J13):* ${choices}\n*Población (Opc.):* ${phone}\n\n_He completado mi registro, aguardo confirmación._`;
             const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/5211234567890?text=${encodedMessage}`, '_blank');
+            window.open(`https://wa.me/12057671414?text=${encodedMessage}`, '_blank');
         });
     }
 });
