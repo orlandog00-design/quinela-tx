@@ -37,25 +37,23 @@
 
 <section class="match-table-container">
     <div style="margin-bottom: 2rem; display: flex; gap: 1rem;">
-        <input type="text" id="result-search" placeholder="Buscar por nombre o celular..." style="margin-bottom: 0;">
-        <button class="btn-primary" style="width: auto; padding: 0 2rem;">BUSCAR</button>
+        <input type="text" id="result-search" placeholder="Buscar por nombre..." style="margin-bottom: 0;">
     </div>
 
-    <table id="results-table">
-        <thead>
-            <tr>
-                <th>PARTICIPANTE</th>
-                <th>PREDICCIONES (J13)</th>
-                <th style="text-align: center;">PTS</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Data will be injected here by JS -->
-            <tr id="loading-row">
-                <td colspan="3" style="text-align: center; color: var(--primary-neon);">Cargando resultados desde Google Sheets...</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="matrix-wrapper">
+        <table id="results-table">
+            <thead>
+                <tr id="table-header-row">
+                    <th class="sticky-col">PARTICIPANTE</th>
+                    <!-- Match columns will be injected here -->
+                    <th style="text-align: center; min-width: 80px;">PTS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be injected here by JS -->
+            </tbody>
+        </table>
+    </div>
 </section>
 
     <!-- Include the data engine -->
@@ -63,35 +61,57 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const tableBody = document.querySelector('#results-table tbody');
+            const headerRow = document.getElementById('table-header-row');
             const searchInput = document.getElementById('result-search');
 
             async function refreshTable(query = "") {
                 const results = await engine.fetchData();
-                if (!results) {
-                    tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--secondary-magenta);">Error al conectar con la base de datos.</td></tr>';
+                const activeJornada = engine.getActiveJornada();
+
+                if (!results || !activeJornada) {
+                    tableBody.innerHTML = '<tr><td colspan="3">Error al cargar datos.</td></tr>';
                     return;
                 }
 
+                // 1. Build Match Header
+                const existingHeaders = headerRow.querySelectorAll('.match-header-cell');
+                existingHeaders.forEach(h => h.remove());
+
+                activeJornada.matches.forEach(match => {
+                    const th = document.createElement('th');
+                    th.className = 'match-header-cell';
+                    
+                    const localLogo = engine.TEAM_LOGOS[match.local] || "";
+                    const visitaLogo = engine.TEAM_LOGOS[match.visita] || "";
+                    
+                    th.innerHTML = `
+                        <div class="logo-pair">
+                            <img src="${localLogo}" alt="${match.local}">
+                            <span class="vs-text">VS</span>
+                            <img src="${visitaLogo}" alt="${match.visita}">
+                        </div>
+                    `;
+                    // Insert before the PTS column
+                    headerRow.insertBefore(th, headerRow.lastElementChild);
+                });
+
+                // 2. Build rows
                 const filtered = engine.search(query);
                 tableBody.innerHTML = '';
                 
                 filtered.forEach(item => {
                     const row = document.createElement('tr');
                     
-                    // Generate the Pick Status circles
-                    const statusHtml = item.pickStatus.map((status, index) => {
+                    // Generate individual pick status cells
+                    const pickCellsHtml = item.pickStatus.map((status, index) => {
                         const picks = item.predicciones.split('-');
                         const char = picks[index] || "?";
-                        return `<div class="pick-dot ${status}">${char}</div>`;
+                        return `<td style="text-align: center;"><div class="pick-dot ${status}">${char}</div></td>`;
                     }).join('');
 
                     row.innerHTML = `
-                        <td class="team-name">${item.nombre || "---"}</td>
-                        <td>
-                            <div class="pick-status-container">
-                                ${statusHtml}
-                            </div>
-                        </td>
+                        <td class="sticky-col team-name">${item.nombre || "---"}</td>
+                        ${pickCellsHtml}
                         <td style="text-align: center; color: var(--secondary-magenta); font-weight: 800; font-size: 1.2rem;">
                             ${item.computedPts || 0}
                         </td>
