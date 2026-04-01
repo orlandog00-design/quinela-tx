@@ -110,6 +110,10 @@ nav ul li a:hover {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
+.match-table-container.wide-matrix {
+    max-width: 1400px;
+}
+
 table {
     width: 100%;
     border-collapse: separate;
