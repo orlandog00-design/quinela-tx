@@ -1,15 +1,71 @@
 // assets/js/main.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle Match Choice selection
-    const choiceBoxes = document.querySelectorAll('.choice-box');
-    choiceBoxes.forEach(box => {
-        box.addEventListener('click', () => {
-            const row = box.parentElement.parentElement;
-            row.querySelectorAll('.choice-box').forEach(b => b.classList.remove('active'));
-            box.classList.add('active');
+    // --- DYNAMIC MATCH ENGINE ---
+    const matchList = document.getElementById('match-list');
+    
+    // Default Matches (Fallbacks if Google Sheet matches tab is not set)
+    const DEFAULT_MATCHES = [
+        { local: "Puebla", visita: "Tigres" },
+        { local: "América", visita: "San Luis" },
+        { local: "Mazatlán", visita: "Tijuana" },
+        { local: "Pachuca", visita: "Toluca" },
+        { local: "Monterrey", visita: "Chivas" },
+        { local: "Pumas", visita: "Cruz Azul" },
+        { local: "Atlas", visita: "Querétaro" },
+        { local: "Necaxa", visita: "León" },
+        { local: "Juárez", visita: "Santos" }
+    ];
+
+    function renderMatches(matches) {
+        if (!matchList) return;
+        matchList.innerHTML = "";
+        
+        matches.forEach(match => {
+            const row = document.createElement('tr');
+            
+            // Get logos from DataEngine registry
+            const localLogo = engine.TEAM_LOGOS[match.local] || "https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_Unknown.png";
+            const visitaLogo = engine.TEAM_LOGOS[match.visita] || "https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_Unknown.png";
+            
+            row.innerHTML = `
+                <td>
+                    <div class="team-row">
+                        <div class="team-info">
+                            <img src="${localLogo}" class="team-logo" alt="${match.local}">
+                            <span>${match.local}</span>
+                        </div>
+                        <div class="match-vs">VS</div>
+                        <div class="team-info">
+                            <img src="${visitaLogo}" class="team-logo" alt="${match.visita}">
+                            <span>${match.visita}</span>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="choice-box">L</span></td>
+                <td><span class="choice-box">E</span></td>
+                <td><span class="choice-box">V</span></td>
+            `;
+            matchList.appendChild(row);
         });
-    });
+
+        // Re-attach listeners to new choice boxes
+        attachChoiceListeners();
+    }
+
+    function attachChoiceListeners() {
+        const choiceBoxes = document.querySelectorAll('.choice-box');
+        choiceBoxes.forEach(box => {
+            box.addEventListener('click', () => {
+                const row = box.parentElement.parentElement;
+                row.querySelectorAll('.choice-box').forEach(b => b.classList.remove('active'));
+                box.classList.add('active');
+            });
+        });
+    }
+
+    // Initial Load
+    renderMatches(DEFAULT_MATCHES);
 
     // Simple Countdown
     const countdownElement = document.getElementById('countdown');
