@@ -180,6 +180,38 @@ td:last-child { border-radius: 0 12px 12px 0; }
     box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
 }
 
+/* Branding & Logo Icons */
+.header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #fff;
+    text-shadow: 0 0 10px var(--primary-neon);
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 5px var(--primary-neon));
+}
+
+.hero-logo {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 20px var(--secondary-magenta));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
 /* Match Row Enhancements */
 .team-row {
     display: flex;
