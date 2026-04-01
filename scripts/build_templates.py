@@ -61,40 +61,30 @@ def main():
     template_with_partials = template_html.replace('{{header}}', header_html)
     template_with_partials = template_with_partials.replace('{{footer}}', footer_html)
 
-    html_files = [p for p in ROOT.glob('*.html') if p.name not in ['template.html']]
+    # Buscar archivos fuente en la nueva carpeta src/
+    src_dir = ROOT / 'src'
+    html_files = [p for p in src_dir.glob('*.html')]
     
-    out_dir = ROOT / 'dist'
-    if not out_dir.exists():
-        out_dir.mkdir(parents=True)
+    # Directorio de salida es AHORA la raíz para despliegue directo
+    out_dir = ROOT 
 
-    print(f"Generando {len(html_files)} páginas en el directorio '{out_dir}'...")
+    print(f"Generando {len(html_files)} páginas finales en '{out_dir}'...")
 
     for src_path in html_files:
         print(f'Procesando {src_path.name}...')
         page_content_str = src_path.read_text(encoding='utf-8')
         extracted_data = extract_from_html(page_content_str)
         
-        if not extracted_data['title'] and not extracted_data['content']:
-            print(f"Warning: No se pudo extraer título o contenido de {src_path.name}", file=sys.stderr)
-
-        # Rellenar el contenido y el título de la página en la plantilla ya con partials
+        # Rellenar el contenido y el título de la página en la plantilla
         final_html = template_with_partials.replace('{{page_title}}', extracted_data['title'])
         final_html = final_html.replace('{{page_content}}', extracted_data['content'])
         
         target_path = out_dir / src_path.name
         target_path.write_text(final_html, encoding='utf-8')
 
-    assets_src_dir = ROOT / 'assets'
-    assets_dest_dir = out_dir / 'assets'
-    try:
-        shutil.copytree(assets_src_dir, assets_dest_dir, dirs_exist_ok=True)
-        print(f"\nCopiando directorio de assets a '{assets_dest_dir}'...")
-    except Exception as e:
-        print(f"Error copiando el directorio de assets: {e}", file=sys.stderr)
-
     print('\n¡Hecho!')
-    print('Las páginas del sitio se han generado en el directorio /dist.')
-    print('Para ver los cambios, abre los archivos de /dist en tu navegador.')
+    print('Las páginas finales se han generado en la RAÍZ para despliegue directo.')
+    print('Recuerda subir estos cambios a GitHub para verlos en vivo.')
 
 if __name__ == '__main__':
     main()
