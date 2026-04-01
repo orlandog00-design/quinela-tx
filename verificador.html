@@ -44,41 +44,48 @@
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('verify-search');
             const searchBtn = document.getElementById('verify-btn');
-            const resultsDiv = document.getElementById('verify-results');
-            const noResultsDiv = document.getElementById('no-results');
+            const resultContainer = document.getElementById('verify-results');
 
-            async function doSearch() {
-                const query = searchInput.value.toLowerCase();
+            async function performSearch() {
+                const query = searchInput.value.trim().toLowerCase();
                 if (!query) return;
 
-                // Fetch latest data from Google Sheets
-                const data = await engine.fetchData();
-                if (!data) return;
+                const results = await engine.fetchData();
+                const participant = results.find(item => 
+                    item.nombre.toLowerCase().includes(query)
+                );
 
-                const found = engine.search(query)[0]; // Get first match
+                resultContainer.innerHTML = "";
+                if (participant) {
+                    const statusClass = participant.paymentStatus === "PAGADO" ? "status-pagado" : "status-pendiente";
+                    const statusText = participant.paymentStatus || "PENDIENTE";
+                    
+                    resultContainer.innerHTML = `
+                        <div class="result-card" style="animation: fadeIn 0.5s ease-out;">
+                            <h2 style="color: var(--primary-neon); margin-bottom: 0.5rem;">${participant.nombre}</h2>
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Quiniela J13 Registrada</p>
+                            
+                            <div style="margin-bottom: 2rem;">
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
 
-                if (found) {
-                    document.getElementById('verify-name').textContent = found.nombre || "---";
-                    
-                    // Logic for status: if they have PTS or are in the sheet, they are verified
-                    const isPaid = found.pts !== undefined && found.pts !== "";
-                    document.getElementById('verify-status').textContent = isPaid ? 'PAGADA' : 'PENDIENTE';
-                    document.getElementById('verify-date').textContent = 'Jornada 13';
-                    document.getElementById('verify-picks').textContent = found.predicciones || "---";
-                    
-                    // Color status correctly
-                    const statusEl = document.getElementById('verify-status');
-                    statusEl.style.color = isPaid ? '#00f5ff' : '#ff00ff';
-                    
-                    resultsDiv.style.display = 'block';
-                    noResultsDiv.style.display = 'none';
+                            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.1);">
+                                <p style="color: var(--accent-yellow); font-size: 0.8rem; font-weight: 800; margin-bottom: 0.5rem; text-transform: uppercase;">Pronóstico Seleccionado:</p>
+                                <p style="font-family: monospace; letter-spacing: 2px; font-size: 1.2rem; color: #fff;">${participant.predicciones}</p>
+                            </div>
+                        </div>
+                    `;
                 } else {
-                    resultsDiv.style.display = 'none';
-                    noResultsDiv.style.display = 'block';
+                    resultContainer.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--secondary-magenta);">
+                            <p>No se encontró ningún registro para "${query}".</p>
+                            <p style="font-size: 0.8rem; margin-top: 1rem; color: var(--text-muted);">Asegúrate de escribir el nombre exactamente como en tu registro.</p>
+                        </div>
+                    `;
                 }
             }
 
-            searchBtn.addEventListener('click', doSearch);
+            searchBtn.addEventListener('click', performSearch);
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') doSearch();
             });

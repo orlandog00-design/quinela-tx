@@ -180,6 +180,78 @@ td:last-child { border-radius: 0 12px 12px 0; }
     box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
 }
 
+/* Registration Lockdown - Payment Flow */
+.payment-selection {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px dashed var(--primary-neon);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.payment-grid {
+    display: flex;
+    gap: 15px;
+    margin-top: 1rem;
+}
+
+.btn-payment {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-paypal {
+    background: #0070ba;
+    color: white;
+}
+
+.btn-paypal:hover {
+    box-shadow: 0 0 15px #0070ba;
+}
+
+.btn-zelle {
+    background: #6d1ed1;
+    color: white;
+}
+
+.btn-zelle:hover {
+    box-shadow: 0 0 15px #6d1ed1;
+}
+
+.upload-container {
+    margin-top: 1.5rem;
+    background: rgba(255,255,255,0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(109, 30, 209, 0.3);
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 900;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.status-pagado {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
+.status-pendiente {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+}
+
 /* Pro Ranking & Sticky Columns */
 .sticky-col-rank {
     position: sticky;

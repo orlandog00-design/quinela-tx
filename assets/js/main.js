@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const regIniciaDisplay = document.getElementById('reg-inicia');
     const regCierreDisplay = document.getElementById('reg-cierre');
     
-    // Get the active Jornada based on today's date (April 1st)
+    // Get the active Jornada based on today's date
     const activeJornada = engine.getActiveJornada();
 
     function renderMatches(matches) {
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         matches.forEach(match => {
             const row = document.createElement('tr');
             
-            // Get logos from DataEngine registry
             const localLogo = engine.TEAM_LOGOS[match.local] || "https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_Unknown.png";
             const visitaLogo = engine.TEAM_LOGOS[match.visita] || "https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_Unknown.png";
             
@@ -61,101 +60,131 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Load matches for the current date
-    renderMatches(activeJornada.matches);
+    if (activeJornada && activeJornada.matches) {
+        renderMatches(activeJornada.matches);
+    }
 
-    // Simple Countdown (Sync with Jornada Start)
-    const countdownElement = document.getElementById('countdown');
-    if (countdownElement) {
-        const targetDate = new Date(activeJornada.startDate || activeJornada.endDate).getTime();
-        
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
+    // --- PAYMENT LOCKDOWN LOGIC ---
+    const btnPaypal = document.getElementById('pay-paypal');
+    const btnZelle = document.getElementById('pay-zelle');
+    const zelleInstructions = document.getElementById('zelle-instructions');
+    const zelleScreenshot = document.getElementById('zelle-screenshot');
+    const finalizeBtn = document.getElementById('finalizar-btn');
+    const lockMsg = document.getElementById('lock-msg');
+    
+    let paymentMethod = "";
+    let paypalDone = false;
+    let zelleDone = false;
+
+    function unlockIfReady() {
+        if (paypalDone || zelleDone) {
+            finalizeBtn.disabled = false;
+            finalizeBtn.style.opacity = "1";
+            finalizeBtn.style.cursor = "pointer";
+            lockMsg.style.color = "var(--primary-neon)";
+            lockMsg.textContent = "✓ ¡Listo para finalizar!";
+        }
+    }
+
+    if (btnPaypal) {
+        btnPaypal.addEventListener('click', () => {
+            window.open('https://www.paypal.com/ncp/payment/BDGD5MXKMEYE8', '_blank');
+            paymentMethod = "PAYPAL";
+            paypalDone = true;
+            zelleDone = false;
+            if (zelleInstructions) zelleInstructions.style.display = "none";
+            unlockIfReady();
+        });
+    }
+
+    if (btnZelle) {
+        btnZelle.addEventListener('click', () => {
+            if (zelleInstructions) zelleInstructions.style.display = "block";
+            paymentMethod = "ZELLE";
+            paypalDone = false;
+            // Zelle requires the screenshot to unlock
+        });
+    }
+
+    if (zelleScreenshot) {
+        zelleScreenshot.addEventListener('change', () => {
+            if (zelleScreenshot.files.length > 0) {
+                zelleDone = true;
+                unlockIfReady();
+            }
+        });
+    }
+
+    // --- FORM SUBMISSION & WHATSAPP REDIRECT ---
+    const predictionForm = document.getElementById('prediction-form');
+    if (predictionForm) {
+        predictionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            if (distance < 0) {
-                countdownElement.textContent = "¡REGIERTO CERRADO!";
+            const name = document.getElementById('user-name').value;
+            const phone = document.getElementById('user-phone').value;
+            const picks = Array.from(document.querySelectorAll('.choice-box.active'))
+                                .map(box => box.textContent).join('-');
+
+            if (picks.split('-').length < 9) {
+                alert("Por favor, selecciona ganador para todos los partidos.");
                 return;
             }
+
+            // 1. Show loading
+            finalizeBtn.textContent = "REGISTRANDO...";
+            finalizeBtn.disabled = true;
+
+            // 2. Register in Google Sheets (Autonomous)
+            const success = await engine.registerParticipant({
+                nombre: name,
+                telefono: phone,
+                predicciones: picks,
+                metodo_pago: paymentMethod,
+                status: "PAGADO"
+            });
+
+            if (success) {
+                // 3. Build WhatsApp Message (Admin: 12057671414)
+                const adminPhone = "12057671414";
+                const pMethodMsg = paymentMethod === "ZELLE" ? "ZELLE (Adjunto captura)" : "PAYPAL";
+                const message = `*SPORTS KING QUINIELA*\n\n` +
+                                `*Nombre:* ${name}\n` +
+                                `*Celular:* ${phone}\n` +
+                                `*Pronóstico:* ${picks}\n` +
+                                `*Pago:* ${pMethodMsg}\n\n` +
+                                `_He finalizado mi registro y pago._`;
+                
+                const waUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
+                window.location.href = waUrl;
+            } else {
+                alert("Hubo un error al registrar. Intenta de nuevo.");
+                finalizeBtn.textContent = "Finaliza Tu Registro";
+                finalizeBtn.disabled = false;
+            }
+        });
+    }
+
+    // --- SIMPLE COUNTDOWN (SYNC WITH JORNADA START) ---
+    const countdownElement = document.getElementById('countdown');
+    if (countdownElement && activeJornada) {
+        const targetDate = new Date(activeJornada.startDate).getTime();
+
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
 
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
+
             countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-    }
-    if (countdownElement) {
-        let totalSeconds = (4 * 24 * 3600) + (12 * 3600) + (44 * 60) + 27;
-        function updateCountdown() {
-            const days = Math.floor(totalSeconds / (24 * 3600));
-            const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-            if (totalSeconds > 0) totalSeconds--;
-        }
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-    }
 
-    // Form Submission (Automatic Logging + WhatsApp)
-    const form = document.getElementById('prediction-form');
-    const submitBtn = form ? form.querySelector('button') : null;
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywJeMQcBb-b54z7IDL65v3CYNHFnk6PmeWKGH9wUg9PtSssRgf1CrxkatrPPx4MpOV/exec";
-
-    if (form && submitBtn) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const name = form.querySelector('input[type="text"]').value;
-            const phone = form.querySelector('input[type="tel"]').value;
-            
-            // Gather choices
-            const rows = document.querySelectorAll('tbody tr');
-            let choices = "";
-            rows.forEach((row, index) => {
-                const active = row.querySelector('.choice-box.active');
-                choices += (active ? active.textContent : '?');
-                if (index < rows.length - 1) choices += "-";
-            });
-
-            // 1. Show loading state
-            const originalBtnText = submitBtn.textContent;
-            submitBtn.textContent = "REGISTRANDO...";
-            submitBtn.disabled = true;
-
-            // 2. Automate to Google Sheets
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Standard for simple Apps Script POSTs
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        nombre: name,
-                        predicciones: choices,
-                        poblacion: phone
-                    })
-                });
-                console.log("Registration logged to Google Sheets.");
-            } catch (error) {
-                console.error("Error logging to Sheets:", error);
+            if (distance < 0) {
+                clearInterval(timer);
+                countdownElement.textContent = "¡REGISTRO CERRADO!";
             }
-
-            // 3. Open WhatsApp - Send ONLY to the Admin Number (+12057671414)
-            const adminPhone = "12057671414";
-            const message = `*SPORTS KING QUINIELA*\n*Nombre:* ${name}\n*Predicciones (J13):* ${choices}\n*Población/Cel.:* ${phone}\n\n_He completado mi registro, aguardo confirmación._`;
-            const encodedMessage = encodeURIComponent(message);
-            
-            // Redirect to the Admin (Fixed)
-            window.open(`https://wa.me/${adminPhone}?text=${encodedMessage}`, '_blank');
-
-            // 4. Reset button
-            submitBtn.textContent = originalBtnText;
-            submitBtn.disabled = false;
-        });
+        }, 1000);
     }
 });

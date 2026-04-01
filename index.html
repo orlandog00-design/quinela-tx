@@ -44,14 +44,47 @@
 </section>
 
 <section id="registro" class="form-section">
-    <h2 style="color: var(--primary-neon); margin-bottom: 2rem;">REGISTRA TU QUINIELA</h2>
+    <h2 style="color: var(--primary-neon); margin-bottom: 1rem;">1. DATOS DE CONTACTO</h2>
     <form id="prediction-form">
-        <input type="text" placeholder="Nombre completo" required>
-        <input type="tel" placeholder="Número de celular" required>
-        <div style="margin: 2rem 0; color: var(--accent-yellow); font-weight: 700;">
-            COSTO: $10.00 USD
+        <input type="text" id="user-name" placeholder="Nombre completo" required>
+        <input type="tel" id="user-phone" placeholder="Número de celular" required>
+        
+        <div id="payment-box" class="payment-selection">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 1rem;">2. PAGO OBLIGATORIO ($10 USD)</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                Selecciona tu método de pago para desbloquear el registro final.
+            </p>
+            
+            <div class="payment-grid">
+                <button type="button" id="pay-paypal" class="btn-payment btn-paypal">
+                    Pagar con PayPal
+                </button>
+                <button type="button" id="pay-zelle" class="btn-payment btn-zelle">
+                    Pagar con Zelle
+                </button>
+            </div>
+
+            <!-- Zelle Instructions (Hidden by default) -->
+            <div id="zelle-instructions" class="upload-container" style="display: none; margin-top: 2rem;">
+                <p style="color: #fff; font-weight: 700; margin-bottom: 0.5rem;">ZELLE INFO:</p>
+                <p style="color: var(--primary-neon); font-size: 1.2rem; font-weight: 900;">Jhonatan Magdaleno Tovar</p>
+                <p style="color: var(--primary-neon); font-size: 1.2rem; font-weight: 900;">205-767-1414</p>
+                
+                <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                    <p style="color: var(--secondary-magenta); font-size: 0.8rem; font-weight: 800; margin-bottom: 1rem;">
+                        SUBE CAPTURA DEL COMPROBANTE:
+                    </p>
+                    <input type="file" id="zelle-screenshot" accept="image/*" style="background: none; border: none; font-size: 0.8rem;">
+                </div>
+            </div>
         </div>
-        <button type="submit" class="btn-primary">ENVIAR POR WHATSAPP</button>
+
+        <button type="submit" id="finalizar-btn" class="btn-primary" disabled style="opacity: 0.5; cursor: not-allowed;">
+            Finaliza Tu Registro
+        </button>
+        <p id="lock-msg" style="font-size: 0.75rem; color: var(--secondary-magenta); margin-top: 1rem;">
+            * El botón se activará al confirmar tu pago o subir el comprobante.
+        </p>
     </form>
 </section>
 </main>

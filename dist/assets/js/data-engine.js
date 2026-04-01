@@ -107,7 +107,8 @@ class DataEngine {
                     nombre: values[0]?.trim(),
                     predicciones: values[1]?.trim(),
                     pts: parseInt(values[2]?.trim()) || 0,
-                    telefono: values[3]?.trim()
+                    telefono: values[3]?.trim(),
+                    status: values[4]?.trim() || "PENDIENTE"
                 };
             }).filter(item => item !== null && item.nombre !== "");
 
@@ -135,7 +136,8 @@ class DataEngine {
                 return {
                     ...p,
                     computedPts: computedPts, // We use this for highlighting
-                    pickStatus: status
+                    pickStatus: status,
+                    paymentStatus: p.status // This will be used in Verificador
                 };
             });
 
@@ -146,6 +148,25 @@ class DataEngine {
         } catch (error) {
             console.error("Error fetching data:", error);
             return [];
+        }
+    }
+
+    async registerParticipant(data) {
+        try {
+            // Default status is PAGADO as per user request
+            const payload = {
+                ...data,
+                status: "PAGADO"
+            };
+            
+            const response = await fetch(this.url, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            return response.ok;
+        } catch (error) {
+            console.error("Error registering participant:", error);
+            return false;
         }
     }
 
