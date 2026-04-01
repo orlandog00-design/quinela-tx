@@ -1,25 +1,19 @@
 // assets/js/main.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DYNAMIC MATCH ENGINE ---
+    // --- DYNAMIC MATCH ENGINE (ULTIMATE AUTOMATION) ---
     const matchList = document.getElementById('match-list');
+    const jornadaDisplay = document.getElementById('jornada-display');
     
-    // Default Matches (Fallbacks if Google Sheet matches tab is not set)
-    const DEFAULT_MATCHES = [
-        { local: "Puebla", visita: "Tigres" },
-        { local: "América", visita: "San Luis" },
-        { local: "Mazatlán", visita: "Tijuana" },
-        { local: "Pachuca", visita: "Toluca" },
-        { local: "Monterrey", visita: "Chivas" },
-        { local: "Pumas", visita: "Cruz Azul" },
-        { local: "Atlas", visita: "Querétaro" },
-        { local: "Necaxa", visita: "León" },
-        { local: "Juárez", visita: "Santos" }
-    ];
+    // Get the active Jornada based on today's date (April 1st)
+    const activeJornada = engine.getActiveJornada();
 
     function renderMatches(matches) {
         if (!matchList) return;
         matchList.innerHTML = "";
+        
+        // Update header
+        if (jornadaDisplay) jornadaDisplay.textContent = activeJornada.name;
         
         matches.forEach(match => {
             const row = document.createElement('tr');
@@ -49,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
             matchList.appendChild(row);
         });
 
-        // Re-attach listeners to new choice boxes
         attachChoiceListeners();
     }
 
@@ -64,11 +57,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initial Load
-    renderMatches(DEFAULT_MATCHES);
+    // Load matches for the current date
+    renderMatches(activeJornada.matches);
 
-    // Simple Countdown
+    // Simple Countdown (Sync with Jornada Start)
     const countdownElement = document.getElementById('countdown');
+    if (countdownElement) {
+        const targetDate = new Date(activeJornada.startDate || activeJornada.endDate).getTime();
+        
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            
+            if (distance < 0) {
+                countdownElement.textContent = "¡REGIERTO CERRADO!";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    }
     if (countdownElement) {
         let totalSeconds = (4 * 24 * 3600) + (12 * 3600) + (44 * 60) + 27;
         function updateCountdown() {
