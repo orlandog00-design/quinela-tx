@@ -156,13 +156,13 @@ class DataEngine {
 
     async registerParticipant(data) {
         try {
-            // Mapping for the Google Apps Script: "poblacion" is used for the phone column
+            // Initial status is PENDIENTE until the admin verifies the funds
             const payload = {
                 nombre: data.nombre,
                 predicciones: data.predicciones,
                 poblacion: data.telefono,  
                 metodo_pago: data.metodo_pago || "NONE",
-                status: "PAGADO"
+                status: "PENDIENTE"
             };
             
             // Note: Google Apps Script requires no-cors for simple browser POSTs
