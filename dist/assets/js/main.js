@@ -49,6 +49,30 @@ document.addEventListener('DOMContentLoaded', () => {
         attachChoiceListeners();
     }
 
+    function unlockIfReady() {
+        const totalPicks = document.querySelectorAll('.choice-box.active').length;
+        const matchesComplete = totalPicks === 9; // Mandatory: all 9 matches
+        
+        if ((paypalDone || zelleDone) && matchesComplete) {
+            finalizeBtn.disabled = false;
+            finalizeBtn.style.opacity = "1";
+            finalizeBtn.style.cursor = "pointer";
+            lockMsg.style.color = "var(--primary-neon)";
+            lockMsg.textContent = "✓ ¡Picks y Pago listos! Finaliza ahora.";
+        } else {
+            finalizeBtn.disabled = true;
+            finalizeBtn.style.opacity = "0.5";
+            
+            if (!matchesComplete) {
+                lockMsg.textContent = `⚠ Selecciona todos los partidos (${totalPicks}/9)`;
+                lockMsg.style.color = "var(--secondary-magenta)";
+            } else {
+                lockMsg.textContent = "⚠ Pendiente: Completa tu pago arriba.";
+                lockMsg.style.color = "var(--accent-yellow)";
+            }
+        }
+    }
+
     function attachChoiceListeners() {
         const choiceBoxes = document.querySelectorAll('.choice-box');
         choiceBoxes.forEach(box => {
@@ -56,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const row = box.parentElement.parentElement;
                 row.querySelectorAll('.choice-box').forEach(b => b.classList.remove('active'));
                 box.classList.add('active');
+                unlockIfReady(); // Check status on every pick
             });
         });
     }
