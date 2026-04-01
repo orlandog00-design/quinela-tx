@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. Open WhatsApp
             const message = `*SPORTS KING QUINIELA*\n*Nombre:* ${name}\n*Predicciones (J13):* ${choices}\n*Población (Opc.):* ${phone}\n\n_He completado mi registro, aguardo confirmación._`;
             const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/12057671414?text=${encodedMessage}`, '_blank');
+            window.open(`https://wa.me/17863971861?text=${encodedMessage}`, '_blank');
 
             // 4. Reset button
             submitBtn.textContent = originalBtnText;
