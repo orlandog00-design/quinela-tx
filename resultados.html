@@ -17,7 +17,8 @@
         <table id="results-table">
             <thead>
                 <tr id="table-header-row">
-                    <th class="sticky-col">PARTICIPANTE</th>
+                    <th class="sticky-col-rank">POS</th>
+                    <th class="sticky-col-name">PARTICIPANTE</th>
                     <!-- Match columns will be injected here -->
                     <th style="text-align: center; min-width: 80px;">PTS</th>
                 </tr>
@@ -46,6 +47,9 @@
                     return;
                 }
 
+                // Sort results by computed PTS (Highest first)
+                results.sort((a, b) => (b.computedPts || 0) - (a.computedPts || 0));
+
                 // 1. Build Match Header
                 const existingHeaders = headerRow.querySelectorAll('.match-header-cell');
                 existingHeaders.forEach(h => h.remove());
@@ -72,18 +76,21 @@
                 const filtered = engine.search(query);
                 tableBody.innerHTML = '';
                 
-                filtered.forEach(item => {
+                filtered.forEach((item, index) => {
                     const row = document.createElement('tr');
+                    const rank = index + 1;
+                    const rankClass = rank === 1 ? 'rank-gold' : '';
                     
                     // Generate individual pick status cells
-                    const pickCellsHtml = item.pickStatus.map((status, index) => {
+                    const pickCellsHtml = item.pickStatus.map((status, idx) => {
                         const picks = item.predicciones.split('-');
-                        const char = picks[index] || "?";
+                        const char = picks[idx] || "?";
                         return `<td style="text-align: center;"><div class="pick-dot ${status}">${char}</div></td>`;
                     }).join('');
 
                     row.innerHTML = `
-                        <td class="sticky-col team-name">${item.nombre || "---"}</td>
+                        <td class="sticky-col-rank ${rankClass}">${rank}</td>
+                        <td class="sticky-col-name team-name">${item.nombre || "---"}</td>
                         ${pickCellsHtml}
                         <td style="text-align: center; color: var(--secondary-magenta); font-weight: 800; font-size: 1.2rem;">
                             ${item.computedPts || 0}

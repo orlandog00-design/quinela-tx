@@ -180,6 +180,34 @@ td:last-child { border-radius: 0 12px 12px 0; }
     box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
 }
 
+/* Pro Ranking & Sticky Columns */
+.sticky-col-rank {
+    position: sticky;
+    left: 0;
+    background: var(--bg-dark) !important;
+    z-index: 11;
+    min-width: 50px;
+    text-align: center;
+    font-weight: 900;
+    color: var(--accent-yellow);
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.sticky-col-name {
+    position: sticky;
+    left: 50px;
+    background: var(--bg-dark) !important;
+    z-index: 10;
+    min-width: 150px;
+    border-right: 2px solid var(--primary-neon) !important;
+    box-shadow: 10px 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.rank-gold {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
 /* Pro Visual Matrix Leaderboard */
 .matrix-wrapper {
     overflow-x: auto;
