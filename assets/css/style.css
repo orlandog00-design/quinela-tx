@@ -286,14 +286,15 @@ td:last-child { border-radius: 0 12px 12px 0; }
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(0, 245, 255, 0.1);
     border-radius: 12px;
-    margin-top: 2rem;
+    margin: 2rem auto;
+    max-width: 1600px; /* Expanded for full visibility */
+    width: 98%;
 }
 
 #results-table {
     border-collapse: separate;
     border-spacing: 0;
-    width: auto; /* Allow expansion for matches */
-    min-width: 100%;
+    width: 100%; 
 }
 
 .sticky-col {
@@ -302,13 +303,13 @@ td:last-child { border-radius: 0 12px 12px 0; }
     background: var(--bg-dark) !important;
     z-index: 10;
     border-right: 2px solid var(--primary-neon) !important;
-    min-width: 150px;
+    min-width: 140px;
     box-shadow: 10px 0 15px rgba(0, 0, 0, 0.5);
 }
 
 .match-header-cell {
-    min-width: 100px;
-    padding: 10px !important;
+    min-width: 85px; /* Compacted to fit more columns */
+    padding: 8px !important;
     background: rgba(0, 245, 255, 0.05);
     border-bottom: 2px solid rgba(0, 245, 255, 0.2);
 }
