@@ -87,7 +87,7 @@ def main():
     assets_src_dir = ROOT / 'assets'
     assets_dest_dir = out_dir / 'assets'
     try:
-        shutil.copytree(assets_src_dir, assets_dest_dir)
+        shutil.copytree(assets_src_dir, assets_dest_dir, dirs_exist_ok=True)
         print(f"\nCopiando directorio de assets a '{assets_dest_dir}'...")
     except Exception as e:
         print(f"Error copiando el directorio de assets: {e}", file=sys.stderr)
