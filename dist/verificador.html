@@ -31,12 +31,12 @@
     <main>
         <section class="hero" style="padding: 4rem 1rem;">
     <h1>VERIFICADOR DE QUINIELA</h1>
-    <p style="margin-top: 1rem; color: var(--text-muted);">Ingresa tu nombre para verificar el estado oficial de tu registro y pago.</p>
+    <p style="margin-top: 1rem; color: var(--text-muted);">Ingresa tu nombre completo o número de celular para verificar tu registro oficial.</p>
 </section>
 
 <section class="form-section">
     <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
-        <input type="text" id="verify-search" placeholder="Nombre completo..." style="margin-bottom: 0;">
+        <input type="text" id="verify-search" placeholder="Nombre o Celular..." style="margin-bottom: 0;">
         <button class="btn-primary" id="verify-btn" style="width: auto; padding: 0 2rem;">BUSCAR</button>
     </div>
 
@@ -64,7 +64,8 @@
 
                 const results = await engine.fetchData();
                 const participant = results.find(item => 
-                    item.nombre.toLowerCase().includes(query)
+                    item.nombre.toLowerCase().includes(query) ||
+                    (item.telefono && item.telefono.includes(query))
                 );
 
                 resultContainer.innerHTML = "";
