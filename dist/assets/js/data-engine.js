@@ -93,15 +93,59 @@ class DataEngine {
 
     async fetchData() {
         try {
-            console.log("Fetching results from Google Sheets...");
             const response = await fetch(this.url);
-            if (!response.ok) throw new Error("Failed to fetch data from Google Sheets.");
             const csvText = await response.text();
-            this.data = this.parseCSV(csvText);
+            
+            // Simple CSV to JSON Parser
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',');
+            
+            const rawData = lines.slice(1).map(line => {
+                const values = line.split(',');
+                if (values.length < 3) return null;
+                return {
+                    nombre: values[0]?.trim(),
+                    predicciones: values[1]?.trim(),
+                    pts: parseInt(values[2]?.trim()) || 0,
+                    telefono: values[3]?.trim()
+                };
+            }).filter(item => item !== null && item.nombre !== "");
+
+            // --- ELITE SCORING LOGIC ---
+            // Find the Official Results row
+            const officialRow = rawData.find(item => 
+                item.nombre.toUpperCase() === "RESULTADOS_OFICIALES" || 
+                item.nombre.toUpperCase() === "OFFICIAL_RESULTS"
+            );
+
+            this.officialPicks = officialRow ? officialRow.predicciones.split('-') : [];
+            
+            // Process participants
+            this.data = rawData.filter(item => item !== officialRow).map(p => {
+                const pPicks = p.predicciones.split('-');
+                let computedPts = 0;
+                const status = pPicks.map((pick, index) => {
+                    const official = this.officialPicks[index];
+                    if (!official || official === "" || official === "?") return 'pending';
+                    const isCorrect = pick.toUpperCase() === official.toUpperCase();
+                    if (isCorrect) computedPts++;
+                    return isCorrect ? 'correct' : 'incorrect';
+                });
+
+                return {
+                    ...p,
+                    computedPts: computedPts, // We use this for highlighting
+                    pickStatus: status
+                };
+            });
+
+            // Sort by Points (Highest first)
+            this.data.sort((a, b) => (b.pts || b.computedPts) - (a.pts || a.computedPts));
+
             return this.data;
         } catch (error) {
             console.error("Error fetching data:", error);
-            return null;
+            return [];
         }
     }
 

@@ -77,10 +77,24 @@
                 
                 filtered.forEach(item => {
                     const row = document.createElement('tr');
+                    
+                    // Generate the Pick Status circles
+                    const statusHtml = item.pickStatus.map((status, index) => {
+                        const picks = item.predicciones.split('-');
+                        const char = picks[index] || "?";
+                        return `<div class="pick-dot ${status}">${char}</div>`;
+                    }).join('');
+
                     row.innerHTML = `
                         <td class="team-name">${item.nombre || "---"}</td>
-                        <td style="font-family: monospace; letter-spacing: 1px; color: var(--text-muted);">${item.predicciones || "---"}</td>
-                        <td style="text-align: center; color: var(--secondary-magenta); font-weight: 800; font-size: 1.2rem;">${item.pts || "0"}</td>
+                        <td>
+                            <div class="pick-status-container">
+                                ${statusHtml}
+                            </div>
+                        </td>
+                        <td style="text-align: center; color: var(--secondary-magenta); font-weight: 800; font-size: 1.2rem;">
+                            ${item.computedPts || 0}
+                        </td>
                     `;
                     tableBody.appendChild(row);
                 });
