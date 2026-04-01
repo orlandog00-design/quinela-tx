@@ -156,7 +156,22 @@ document.addEventListener('DOMContentLoaded', () => {
                                 `_He finalizado mi registro y pago._`;
                 
                 const waUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
-                window.location.href = waUrl;
+                
+                // 4. Open WhatsApp in NEW TAB
+                window.open(waUrl, '_blank');
+
+                // 5. Show Success Message on Main Page
+                const registroSection = document.getElementById('registro');
+                if (registroSection) {
+                    registroSection.innerHTML = `
+                        <div class="success-message" style="text-align: center; padding: 4rem 2rem; border: 2px solid var(--primary-neon); border-radius: 12px; background: rgba(0, 245, 255, 0.05);">
+                            <h1 style="color: var(--primary-neon); font-size: 2.5rem; margin-bottom: 1rem; text-shadow: 0 0 20px var(--primary-neon);">¡REGISTRO FINALIZADO!</h1>
+                            <p style="color: #fff; font-size: 1.5rem; font-weight: 800;">🏆 ¡BUENA SUERTE! 🏆</p>
+                            <p style="color: var(--text-muted); margin-top: 2rem; font-size: 0.9rem;">Tu participación ya está guardada en nuestra base de datos.</p>
+                            <button onclick="window.location.reload()" class="btn-primary" style="margin-top: 2rem; width: auto; padding: 0 2rem;">REGISTRAR OTRA</button>
+                        </div>
+                    `;
+                }
             } else {
                 alert("Hubo un error al registrar. Intenta de nuevo.");
                 finalizeBtn.textContent = "Finaliza Tu Registro";
