@@ -4,37 +4,18 @@
 <main>
 <section class="hero" style="padding: 4rem 1rem;">
     <h1>VERIFICADOR DE QUINIELA</h1>
-    <p style="margin-top: 1rem; color: var(--text-muted);">Ingresa tu nombre o número de celular para verificar el estado de tu registro.</p>
+    <p style="margin-top: 1rem; color: var(--text-muted);">Ingresa tu nombre para verificar el estado oficial de tu registro y pago.</p>
 </section>
 
 <section class="form-section">
     <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
-        <input type="text" id="verify-search" placeholder="Nombre o Celular..." style="margin-bottom: 0;">
+        <input type="text" id="verify-search" placeholder="Nombre completo..." style="margin-bottom: 0;">
         <button class="btn-primary" id="verify-btn" style="width: auto; padding: 0 2rem;">BUSCAR</button>
     </div>
 
-    <div id="verify-results" style="display: none;">
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 12px; text-align: left;">
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">REGISTRO ENCONTRADO:</p>
-            <h3 id="verify-name" style="color: var(--primary-neon); margin-bottom: 1rem;">---</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-                <div>
-                    <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted);">Estatus</p>
-                    <p id="verify-status" style="font-weight: 800; color: var(--primary-neon);">PAGADA</p>
-                </div>
-                <div>
-                    <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted);">Fecha</p>
-                    <p id="verify-date" style="font-weight: 800;">01/04/2026</p>
-                </div>
-            </div>
-            
-            <p style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Predicciones (L-E-V):</p>
-            <p id="verify-picks" style="font-family: monospace; font-size: 1.2rem; letter-spacing: 2px; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px; text-align: center; border: 1px solid var(--glass-border);">---</p>
-        </div>
-    </div>
-
-    <div id="no-results" style="display: none; padding: 2rem; color: var(--secondary-magenta);">
-        <p>No se encontró ningún registro con ese nombre o número. Verifica que esté bien escrito o regístrate si no lo has hecho.</p>
+    <!-- This is where results will be injected -->
+    <div id="verify-results" style="display: none; min-height: 200px;">
+        <!-- JS will inject results here -->
     </div>
 </section>
 
@@ -49,6 +30,10 @@
             async function performSearch() {
                 const query = searchInput.value.trim().toLowerCase();
                 if (!query) return;
+
+                // Show loading state
+                resultContainer.innerHTML = '<p style="color: var(--primary-neon); text-align: center;">Buscando registro...</p>';
+                resultContainer.style.display = "block";
 
                 const results = await engine.fetchData();
                 const participant = results.find(item => 
@@ -79,7 +64,7 @@
                     resultContainer.innerHTML = `
                         <div style="text-align: center; padding: 2rem; color: var(--secondary-magenta);">
                             <p>No se encontró ningún registro para "${query}".</p>
-                            <p style="font-size: 0.8rem; margin-top: 1rem; color: var(--text-muted);">Asegúrate de escribir el nombre exactamente como en tu registro.</p>
+                            <p style="font-size: 0.8rem; margin-top: 1rem; color: var(--text-muted);">Asegúrate de escribir tu nombre tal cual lo registraste.</p>
                         </div>
                     `;
                 }
@@ -87,7 +72,7 @@
 
             searchBtn.addEventListener('click', performSearch);
             searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') doSearch();
+                if (e.key === 'Enter') performSearch();
             });
         });
     </script>
