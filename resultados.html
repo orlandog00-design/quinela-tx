@@ -144,16 +144,20 @@
                 const filtered = engine.search(query);
                 tableBody.innerHTML = '';
                 
-                // --- PRIZE CALCULATION (20% PROFIT FOR ADMIN) ---
-                const numParticipants = results.length; // Count total participants in DB
-                const totalPot = numParticipants * 10; // $10 per person
-                const winnerPrizeUSD = Math.floor(totalPot * 0.8); // 80% for winner
-                const winnerPrizeMXN = Math.floor(winnerPrizeUSD * 17.5); // Fixed rate of 17.5
-                
+                // --- PRIZE CALCULATION (SYNCED WITH HOME) ---
+                const numParticipants = results.length; 
                 const prizeUsdEl = document.getElementById('prize-usd');
                 const prizeMxnEl = document.getElementById('prize-mxn');
-                if (prizeUsdEl) prizeUsdEl.textContent = `$${winnerPrizeUSD.toLocaleString()} USD`;
-                if (prizeMxnEl) prizeMxnEl.textContent = `$${winnerPrizeMXN.toLocaleString()} MXN`;
+
+                if (numParticipants < 5) {
+                    if (prizeUsdEl) prizeUsdEl.textContent = "TBD";
+                    if (prizeMxnEl) prizeMxnEl.textContent = "Calculando bolsa...";
+                } else {
+                    const totalPot = numParticipants * 10; // $10 per person (Winner takes all)
+                    const totalPotMXN = Math.floor(totalPot * 17.5);
+                    if (prizeUsdEl) prizeUsdEl.textContent = `$${totalPot.toLocaleString()} USD`;
+                    if (prizeMxnEl) prizeMxnEl.textContent = `$${totalPotMXN.toLocaleString()} MXN`;
+                }
 
                 filtered.forEach((item, index) => {
                     const row = document.createElement('tr');

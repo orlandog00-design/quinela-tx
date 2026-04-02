@@ -107,14 +107,19 @@ document.addEventListener('DOMContentLoaded', () => {
     async function updateHomePrizePool() {
         const results = await engine.fetchData();
         const paidParticipants = results.filter(p => p.status === "PAGADO").length;
-        const prizeUSD = paidParticipants * 10;
-        const prizeMXN = prizeUSD * 17.5;
 
         const prizeUsdEl = document.getElementById('home-prize-usd');
         const prizeMxnEl = document.getElementById('home-prize-mxn');
 
-        if (prizeUsdEl) prizeUsdEl.textContent = `$${prizeUSD} USD`;
-        if (prizeMxnEl) prizeMxnEl.textContent = `$${prizeMXN.toLocaleString()} MXN`;
+        if (paidParticipants < 5) {
+            if (prizeUsdEl) prizeUsdEl.textContent = "TBD";
+            if (prizeMxnEl) prizeMxnEl.textContent = "Esperando participantes...";
+        } else {
+            const prizeUSD = paidParticipants * 10;
+            const prizeMXN = prizeUSD * 17.5;
+            if (prizeUsdEl) prizeUsdEl.textContent = `$${prizeUSD} USD`;
+            if (prizeMxnEl) prizeMxnEl.textContent = `$${prizeMXN.toLocaleString()} MXN`;
+        }
     }
 
     // 4. Unlock Logic
