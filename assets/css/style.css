@@ -40,12 +40,27 @@ header {
     align-items: center;
 }
 
-.logo {
-    color: var(--primary-neon);
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.main-logo {
+    height: 50px;
+    width: auto;
+    filter: drop-shadow(0 0 5px var(--primary-neon));
+    transition: var(--transition);
+}
+
+.logo-text {
+    color: var(--text-main);
     font-weight: 900;
-    font-size: 1.8rem;
+    font-size: 1.2rem;
+    line-height: 1;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     text-shadow: var(--neon-shadow);
 }
 
