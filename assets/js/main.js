@@ -1,7 +1,7 @@
 // assets/js/main.js
 
-document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM SELECTIONS ---
+// --- GLOBAL JACKPOT LOGIC (BULLETPROOF) ---
+window.updateJackpotLinks = function() {
     const sideBetToggle = document.getElementById('side-bet-toggle');
     const sideBetInput = document.getElementById('side-bet-input');
     const totalDisplay = document.getElementById('total-display-banner');
@@ -11,32 +11,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const PAYPAL_LINK_13 = "https://www.paypal.com/ncp/payment/R9R6572GVF3GQ";
     const PAYPAL_LINK_3 = "https://www.paypal.com/ncp/payment/A6NMN962TRWNE";
 
-    // --- JACKPOT DYNAMIC LOGIC ---
     if (sideBetToggle) {
-        sideBetToggle.addEventListener('change', (e) => {
-            const isChecked = e.target.checked;
-            if (sideBetInput) sideBetInput.style.display = isChecked ? 'block' : 'none';
+        const isChecked = sideBetToggle.checked;
+        if (sideBetInput) sideBetInput.style.display = isChecked ? 'block' : 'none';
+        
+        if (isChecked) {
+            if (totalDisplay) totalDisplay.textContent = `2. REALIZA TU PAGO ($13 USD / $225 MXN)`;
+            if (paypalBtn) paypalBtn.href = PAYPAL_LINK_13;
             
-            if (isChecked) {
-                if (totalDisplay) totalDisplay.textContent = `2. REALIZA TU PAGO ($13 USD / $225 MXN)`;
-                if (paypalBtn) paypalBtn.href = PAYPAL_LINK_13;
-                
-                if (!document.getElementById('extra-pay-info') && paypalBtn) {
-                    const extraInfo = document.createElement('p');
-                    extraInfo.id = "extra-pay-info";
-                    extraInfo.style.fontSize = "0.75rem";
-                    extraInfo.style.marginTop = "0.8rem";
-                    extraInfo.style.color = "var(--text-muted)";
-                    extraInfo.innerHTML = `¿Ya pagaste los $10? <a href="${PAYPAL_LINK_3}" target="_blank" style="color: #ffd700; font-weight: 700;">Solo Pagar Jackpot ($3)</a>`;
-                    paypalBtn.parentNode.appendChild(extraInfo);
-                }
-            } else {
-                if (totalDisplay) totalDisplay.textContent = `2. REALIZA TU PAGO ($10 USD / $175 MXN)`;
-                if (paypalBtn) paypalBtn.href = PAYPAL_LINK_10;
-                const extra = document.getElementById('extra-pay-info');
-                if (extra) extra.remove();
+            if (!document.getElementById('extra-pay-info') && paypalBtn) {
+                const extraInfo = document.createElement('p');
+                extraInfo.id = "extra-pay-info";
+                extraInfo.style.fontSize = "0.75rem";
+                extraInfo.style.marginTop = "0.8rem";
+                extraInfo.style.color = "var(--text-muted)";
+                extraInfo.innerHTML = `¿Ya pagaste los $10? <a href="${PAYPAL_LINK_3}" target="_blank" style="color: #ffd700; font-weight: 700;">Solo Pagar Jackpot ($3)</a>`;
+                paypalBtn.parentNode.appendChild(extraInfo);
             }
-        });
+        } else {
+            if (totalDisplay) totalDisplay.textContent = `2. REALIZA TU PAGO ($10 USD / $175 MXN)`;
+            if (paypalBtn) paypalBtn.href = PAYPAL_LINK_10;
+            const extra = document.getElementById('extra-pay-info');
+            if (extra) extra.remove();
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Init logic on load
+    window.updateJackpotLinks();
+    
+    const sideBetToggle = document.getElementById('side-bet-toggle');
+    if (sideBetToggle) {
+        sideBetToggle.addEventListener('change', window.updateJackpotLinks);
     }
 
     // --- DYNAMIC MATCH ENGINE (ULTIMATE AUTOMATION) ---
