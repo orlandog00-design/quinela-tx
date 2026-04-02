@@ -77,15 +77,34 @@
         <input type="tel" id="user-phone" placeholder="Número de celular" required>
         
         <div id="payment-box" class="payment-selection">
-            <h2 style="color: var(--accent-yellow); margin-bottom: 1rem;">2. PAGO OBLIGATORIO ($10 USD)</h2>
+            <h2 id="total-display-banner" style="color: var(--accent-yellow); margin-bottom: 1rem;">2. REALIZA TU PAGO ($10 USD / $175 MXN)</h2>
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
                 Selecciona tu método de pago para desbloquear el registro final.
             </p>
+
+            <!-- JACKPOT OPCIONAL (Visible for everyone) -->
+            <div id="side-bet-card" style="margin-bottom: 2rem; background: rgba(255, 215, 0, 0.05); border: 2px dashed #ffd700; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                <h3 style="color: #ffd700; margin-bottom: 0.5rem; font-size: 1rem;">🏆 JACKPOT DE GOLES (OPCIONAL)</h3>
+                <p style="font-size: 0.85rem; color: #fff; opacity: 0.8; margin-bottom: 1rem;">
+                    Paga **$3 USD / $50 MXN extras** y elige el total de goles de los 9 partidos. <br>
+                    ¡Si aciertas el número exacto ganas el **JACKPOT de $30 USD / $525 MXN**!
+                </p>
+                
+                <label id="jackpot-toggle-label" class="payment-method-card" style="display: flex; align-items: center; justify-content: center; gap: 1rem; cursor: pointer; border: 1px solid #ffd700; background: rgba(255, 215, 0, 0.1); margin-bottom: 1rem;">
+                    <input type="checkbox" id="side-bet-toggle" style="width: 20px; height: 20px; cursor: pointer;">
+                    <span style="font-weight: 700; color: #ffd700;">¡SÍ, QUIERO EL JACKPOT!</span>
+                </label>
+
+                <div id="side-bet-input" style="display: none;">
+                    <p style="font-size: 0.8rem; margin-bottom: 0.5rem;">CANTIDAD DE GOLES ESTIMADA:</p>
+                    <input type="number" id="total-goles-pick" placeholder="Ej: 24" style="width: 100px; text-align: center; border: 1px solid #ffd700; background: rgba(0,0,0,0.3); color: #fff; padding: 5px; border-radius: 4px;">
+                </div>
+            </div>
             
             <div class="payment-grid">
-                <button type="button" id="pay-paypal" class="btn-payment btn-paypal">
+                <a href="https://www.paypal.com/ncp/payment/BDGD5KMEYE8" target="_blank" id="pay-paypal" class="btn-payment btn-paypal" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                     PAYPAL / VENMO / APPLE PAY
-                </button>
+                </a>
                 <button type="button" id="pay-zelle" class="btn-payment btn-zelle">
                     Pagar con Zelle
                 </button>
@@ -97,25 +116,6 @@
                 <p style="color: var(--primary-neon); font-size: 1.2rem; font-weight: 900;">Jhonatan Magdaleno Tovar</p>
                 <p style="color: var(--primary-neon); font-size: 1.2rem; font-weight: 900;">205-767-1414</p>
                 
-                <!-- JACKPOT OPCIONAL -->
-                <div id="side-bet-card" style="margin-top: 2rem; background: rgba(255, 215, 0, 0.05); border: 2px dashed #ffd700; padding: 1.5rem; border-radius: 12px; text-align: center;">
-                    <h3 style="color: #ffd700; margin-bottom: 0.5rem; font-size: 1rem;">🏆 JACKPOT DE GOLES (OPCIONAL)</h3>
-                    <p style="font-size: 0.85rem; color: #fff; opacity: 0.8; margin-bottom: 1rem;">
-                        Paga **$3 USD / $50 MXN extras** y elige el total de goles de los 9 partidos. <br>
-                        ¡Si aciertas el número exacto ganas el **JACKPOT de $30 USD / $525 MXN**!
-                    </p>
-                    
-                    <label class="payment-method-card" style="display: flex; align-items: center; justify-content: center; gap: 1rem; cursor: pointer; border: 1px solid #ffd700; background: rgba(255, 215, 0, 0.1);">
-                        <input type="checkbox" id="side-bet-toggle" style="width: 20px; height: 20px; cursor: pointer;">
-                        <span style="font-weight: 700; color: #ffd700;">¡SÍ, QUIERO PARTICIPAR POR EL JACKPOT!</span>
-                    </label>
-
-                    <div id="side-bet-input" style="display: none; margin-top: 1rem;">
-                        <p style="font-size: 0.8rem; margin-bottom: 0.5rem;">CANTIDAD DE GOLES ESTIMADA:</p>
-                        <input type="number" id="total-goles-pick" placeholder="Ej: 24" style="width: 100px; text-align: center; border: 1px solid #ffd700;">
-                    </div>
-                </div>
-
                 <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
                     <p style="color: var(--secondary-magenta); font-size: 0.8rem; font-weight: 800; margin-bottom: 1rem;">
                         SUBE CAPTURA DEL COMPROBANTE:
