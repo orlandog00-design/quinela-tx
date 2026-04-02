@@ -84,17 +84,21 @@
                 const existingHeaders = headerRow.querySelectorAll('.match-header-cell');
                 existingHeaders.forEach(h => h.remove());
 
-                activeJornada.matches.forEach(match => {
+                activeJornada.matches.forEach((match, idx) => {
                     const th = document.createElement('th');
                     th.className = 'match-header-cell';
                     
                     const localLogo = engine.TEAM_LOGOS[match.local] || "";
                     const visitaLogo = engine.TEAM_LOGOS[match.visita] || "";
                     
+                    // Display Live Score if available, otherwise VS
+                    const liveScore = (engine.liveScores && engine.liveScores[idx]) || "VS";
+                    const scoreStyle = liveScore !== "VS" ? 'color: #00ff00; text-shadow: 0 0 5px #00ff00;' : 'color: var(--secondary-magenta);';
+                    
                     th.innerHTML = `
                         <div class="logo-pair">
                             <img src="${localLogo}" alt="${match.local}">
-                            <span class="vs-text">VS</span>
+                            <span class="vs-text" style="${scoreStyle}">${liveScore}</span>
                             <img src="${visitaLogo}" alt="${match.visita}">
                         </div>
                     `;

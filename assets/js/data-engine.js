@@ -115,17 +115,23 @@ class DataEngine {
                 };
             }).filter(item => item !== null && item.nombre !== "");
 
-            // --- ELITE SCORING LOGIC ---
             // Find the Official Results row
             const officialRow = rawData.find(item => 
                 item.nombre.toUpperCase() === "RESULTADOS_OFICIALES" || 
                 item.nombre.toUpperCase() === "OFFICIAL_RESULTS"
             );
 
+            // Find the Live Scores row (NEW)
+            const liveScoresRow = rawData.find(item => 
+                item.nombre.toUpperCase() === "MARCADORES_VIVO" || 
+                item.nombre.toUpperCase() === "LIVE_SCORES"
+            );
+
             this.officialPicks = officialRow ? officialRow.predicciones.split('-') : [];
+            this.liveScores = liveScoresRow ? liveScoresRow.predicciones.split('-') : [];
             
             // Process participants
-            this.data = rawData.filter(item => item !== officialRow).map(p => {
+            this.data = rawData.filter(item => item !== officialRow && item !== liveScoresRow).map(p => {
                 const pPicks = p.predicciones.split('-');
                 let computedPts = 0;
                 const status = pPicks.map((pick, index) => {
