@@ -173,6 +173,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 3. Build WhatsApp Message (Admin: 12057671414)
                 const adminPhone = "12057671414";
                 const pMethodMsg = paymentMethod === "ZELLE" ? "ZELLE (Adjunto captura)" : "PAYPAL";
+                
+                // --- JACKPOT LOGIC ---
+                const sideBetToggle = document.getElementById('side-bet-toggle');
+                const sideBetInput = document.getElementById('side-bet-input');
+                const totalDisplay = document.getElementById('total-display');
+                const paypalBtn = document.getElementById('paypal-btn');
+                
+                const PAYPAL_LINK_10 = "https://www.paypal.me/JhonatanMagdaleno/10";
+                const PAYPAL_LINK_13 = "YOUR_PAYPAL_13_LINK_HERE"; // User will provide this
+
+                if (sideBetToggle) {
+                    sideBetToggle.addEventListener('change', (e) => {
+                        const isChecked = e.target.checked;
+                        sideBetInput.style.display = isChecked ? 'block' : 'none';
+                        totalDisplay.textContent = `TOTAL A PAGAR: $${isChecked ? '13' : '10'} USD`;
+                        paypalBtn.href = isChecked ? PAYPAL_LINK_13 : PAYPAL_LINK_10;
+                    });
+                }
+
+                // --- REGISTRATION LOGIC ---
+                const form = document.querySelector('#register-form');
+                if (form) {
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        
+                        const picksArray = Array.from(document.querySelectorAll('.choice-box.active')).map(b => b.textContent);
+                        if (picksArray.length < 9) {
+                            alert('⚠️ Por favor completa los 9 picks de la jornada.');
+                            return;
+                        }
+
+                        const nombre = document.getElementById('user-name').value;
+                        const totalGolesPick = document.getElementById('total-goles-pick') ? document.getElementById('total-goles-pick').value : "N/A";
+                        const isSideBet = sideBetToggle && sideBetToggle.checked;
+
+                        // WhatsApp redirection
+                        let message = `¡Hola Sports King! Mi registro es:\n\n👤 *Nombre:* ${nombre}\n⚽ *Picks:* ${picksArray.join('-')}`;
+                        if (isSideBet) {
+                            message += `\n🏆 *JACKPOT EXTRA:* Sí (Predicción: ${totalGolesPick} goles)`;
+                            message += `\n💰 *Total Pagado:* $13 USD`;
+                        } else {
+                            message += `\n💰 *Total Pagado:* $10 USD`;
+                        }
+                        
+                        const waUrl = `https://wa.me/12057671414?text=${encodeURIComponent(message)}`;
+                        window.open(waUrl, '_blank');
+                    });
+                }
+
                 const message = `*SPORTS KING QUINIELA*\n\n` +
                                 `*Nombre:* ${name}\n` +
                                 `*Celular:* ${phone}\n` +

@@ -46,6 +46,16 @@
         <div id="prize-mxn" style="font-size: 1.5rem; font-weight: 700; color: #000; margin-top: 0.5rem; opacity: 0.8;">$0 MXN</div>
         <p style="color: #000; font-size: 0.7rem; font-weight: 700; margin-top: 1rem; opacity: 0.6;">EL GANADOR SE LLEVA TODO EL PREMIO</p>
     </div>
+
+    <!-- JACKPOT GOLES STATUS -->
+    <div id="jackpot-status-card" style="margin-top: 1.5rem; background: rgba(0, 0, 0, 0.4); border: 1px solid #ffd700; padding: 1.5rem; border-radius: 12px; display: inline-block; min-width: 320px; vertical-align: top; margin-left: 1rem;">
+        <h4 style="color: #ffd700; font-weight: 900; letter-spacing: 1px; margin-bottom: 0.5rem; font-size: 0.8rem;">🔥 JACKPOT DE GOLES 🔥</h4>
+        <div id="jackpot-total" style="font-size: 2.5rem; font-weight: 900; color: #fff;">0</div>
+        <p style="color: #fff; font-size: 0.7rem; opacity: 0.7;">GOLES TOTALES EN LA JORNADA</p>
+        <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(255,215,0,0.1); border-radius: 5px; font-size: 0.75rem; color: #ffd700; font-weight: 700;">
+            PREMIO: $30 USD EXTRA
+        </div>
+    </div>
 </section>
 
 <section class="match-table-container wide-matrix">
@@ -87,8 +97,22 @@
                     return;
                 }
 
+                // --- JACKPOT TOTAL CALCULATION ---
+                const jackpotRow = results.find(item => item.nombre.toUpperCase() === "MARCADOR_JACKPOT_GOLES");
+                const jackpotTotalEl = document.getElementById('jackpot-total');
+                if (jackpotTotalEl && jackpotRow) jackpotTotalEl.textContent = jackpotRow.predicciones || "0";
+
+                // Filter out the jackpot and other metadata rows from the main table
+                const finalResults = results.filter(item => 
+                    item.nombre.toUpperCase() !== "RESULTADOS_OFICIALES" && 
+                    item.nombre.toUpperCase() !== "MARCADORES_VIVO" &&
+                    item.nombre.toUpperCase() !== "MARCADOR_JACKPOT_GOLES"
+                );
+
                 // Sort results by computed PTS (Highest first)
-                results.sort((a, b) => (b.computedPts || 0) - (a.computedPts || 0));
+                finalResults.sort((a, b) => (b.computedPts || 0) - (a.computedPts || 0));
+
+                /* ... existing code ... */
 
                 // 1. Build Match Header
                 const existingHeaders = headerRow.querySelectorAll('.match-header-cell');
