@@ -96,7 +96,9 @@ class DataEngine {
 
     async fetchData() {
         try {
-            const response = await fetch(this.url);
+            // Cache-buster to ensure mobile browsers get FRESH data from the sheet
+            const cacheBustedUrl = this.url + (this.url.includes("?") ? "&" : "?") + "t=" + Date.now();
+            const response = await fetch(cacheBustedUrl);
             const csvText = await response.text();
             
             // Simple CSV to JSON Parser
