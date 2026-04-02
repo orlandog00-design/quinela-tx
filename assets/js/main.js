@@ -177,18 +177,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- JACKPOT LOGIC ---
                 const sideBetToggle = document.getElementById('side-bet-toggle');
                 const sideBetInput = document.getElementById('side-bet-input');
-                const totalDisplay = document.getElementById('total-display');
+                const totalDisplay = document.getElementById('total-display-banner');
                 const paypalBtn = document.getElementById('paypal-btn');
                 
                 const PAYPAL_LINK_10 = "https://www.paypal.com/ncp/payment/BDGD5KMEYE8";
                 const PAYPAL_LINK_13 = "https://www.paypal.com/ncp/payment/R9R6572GVF3GQ";
+                const PAYPAL_LINK_3 = "https://www.paypal.com/ncp/payment/A6NMN962TRWNE";
 
                 if (sideBetToggle) {
                     sideBetToggle.addEventListener('change', (e) => {
                         const isChecked = e.target.checked;
                         sideBetInput.style.display = isChecked ? 'block' : 'none';
-                        totalDisplay.textContent = `TOTAL A PAGAR: $${isChecked ? '13' : '10'} USD`;
-                        paypalBtn.href = isChecked ? PAYPAL_LINK_13 : PAYPAL_LINK_10;
+                        
+                        if (isChecked) {
+                            totalDisplay.textContent = `REALIZA TU PAGO ($13 USD / $225 MXN)`;
+                            paypalBtn.href = PAYPAL_LINK_13;
+                            // Option for separate $3 if they already paid $10
+                            const extraInfo = document.createElement('p');
+                            extraInfo.id = "extra-pay-info";
+                            extraInfo.style.fontSize = "0.8rem";
+                            extraInfo.style.marginTop = "0.5rem";
+                            extraInfo.innerHTML = `¿Ya pagaste los $10? <a href="${PAYPAL_LINK_3}" target="_blank" style="color: #ffd700;">Paga solo los $3 del Jackpot aquí</a>`;
+                            if (!document.getElementById('extra-pay-info')) {
+                                paypalBtn.parentNode.insertBefore(extraInfo, paypalBtn.nextSibling);
+                            }
+                        } else {
+                            totalDisplay.textContent = `REALIZA TU PAGO ($10 USD / $175 MXN)`;
+                            paypalBtn.href = PAYPAL_LINK_10;
+                            const extra = document.getElementById('extra-pay-info');
+                            if (extra) extra.remove();
+                        }
                     });
                 }
 
