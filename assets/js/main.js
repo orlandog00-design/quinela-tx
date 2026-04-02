@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalDisplay = document.getElementById('total-display-banner');
     const paypalBtn = document.getElementById('pay-paypal');
     
-    const PAYPAL_LINK_10 = "https://www.paypal.com/ncp/payment/BDGD5KMEYE8";
+    const PAYPAL_LINK_10 = "https://www.paypal.com/ncp/payment/BDGD5MXKMEYE8";
     const PAYPAL_LINK_13 = "https://www.paypal.com/ncp/payment/R9R6572GVF3GQ";
     const PAYPAL_LINK_3 = "https://www.paypal.com/ncp/payment/A6NMN962TRWNE";
 
