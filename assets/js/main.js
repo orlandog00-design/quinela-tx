@@ -180,8 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const totalDisplay = document.getElementById('total-display');
                 const paypalBtn = document.getElementById('paypal-btn');
                 
-                const PAYPAL_LINK_10 = "https://www.paypal.me/JhonatanMagdaleno/10";
-                const PAYPAL_LINK_13 = "YOUR_PAYPAL_13_LINK_HERE"; // User will provide this
+                const PAYPAL_LINK_10 = "https://www.paypal.com/ncp/payment/BDGD5KMEYE8";
+                const PAYPAL_LINK_13 = "https://www.paypal.com/ncp/payment/R9R6572GVF3GQ";
 
                 if (sideBetToggle) {
                     sideBetToggle.addEventListener('change', (e) => {
