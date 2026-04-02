@@ -1,15 +1,24 @@
 <!-- assets/partials/header.html -->
-<header>
-    <a href="index.html" class="header-logo">
-        <img src="assets/img/logo-icon.png" class="logo-icon" alt="Sports King Icon">
-        SPORTS KING
-    </a>
-    <nav>
-        <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="index.html#registro">Registro</a></li>
-            <li><a href="resultados.html">Resultados</a></li>
-            <li><a href="verificador.html">Comprueba tu registro</a></li>
-        </ul>
-    </nav>
+<header id="main-header">
+    <div class="header-container">
+        <a href="index.html" class="logo-container">
+            <img src="assets/images/logo.png" alt="Sports King Logo" class="main-logo">
+            <span class="logo-text">SPORTS<br>KING</span>
+        </a>
+
+        <!-- HAMBURGER BUTTON (MOBILE) -->
+        <button id="menu-toggle" aria-label="Abrir Menú">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- NAVIGATION LINKS -->
+        <nav id="nav-menu">
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> INICIO</a></li>
+                <li><a href="index.html#registro"><i class="fas fa-user-edit"></i> REGISTRO</a></li>
+                <li><a href="resultados.html"><i class="fas fa-poll"></i> RESULTADOS</a></li>
+                <li><a href="verificador.html"><i class="fas fa-search"></i> COMPRUEBA TU REGISTRO</a></li>
+            </ul>
+        </nav>
+    </div>
 </header>
