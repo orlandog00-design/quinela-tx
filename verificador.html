@@ -63,31 +63,47 @@
                 resultContainer.style.display = "block";
 
                 const results = await engine.fetchData();
-                const participant = results.find(item => 
+                const participants = results.filter(item => 
                     item.nombre.toLowerCase().includes(query) ||
-                    (item.telefono && item.telefono.includes(query))
+                    (item.telefono && item.telefono.includes(query)) ||
+                    (item.poblacion && item.poblacion.includes(query)) // Ensure both fields are checked
                 );
 
                 resultContainer.innerHTML = "";
-                if (participant) {
-                    const statusClass = participant.paymentStatus === "PAGADO" ? "status-pagado" : "status-pendiente";
-                    const statusText = participant.paymentStatus || "PENDIENTE";
+                if (participants.length > 0) {
+                    resultContainer.innerHTML = `<h3 style="color: var(--accent-yellow); margin-bottom: 1.5rem; text-align: center;">Hemos encontrado ${participants.length} registro(s):</h3>`;
                     
-                    resultContainer.innerHTML = `
-                        <div class="result-card" style="animation: fadeIn 0.5s ease-out;">
-                            <h2 style="color: var(--primary-neon); margin-bottom: 0.5rem;">${participant.nombre}</h2>
-                            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Quiniela J13 Registrada</p>
+                    const gridContainer = document.createElement('div');
+                    gridContainer.style.display = "grid";
+                    gridContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(300px, 1fr))";
+                    gridContainer.style.gap = "1.5rem";
+                    
+                    participants.forEach((participant, index) => {
+                        const statusClass = participant.status === "PAGADO" ? "status-pagado" : "status-pendiente";
+                        const statusText = participant.status || "PENDIENTE";
+                        
+                        const card = document.createElement('div');
+                        card.className = "result-card";
+                        card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s both`;
+                        card.innerHTML = `
+                            <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1rem;">
+                                <h2 style="color: var(--primary-neon); font-size: 1.4rem;">${participant.nombre}</h2>
+                                <p style="color: var(--text-muted); font-size: 0.8rem;">Registro #${index + 1} | J13 Quiniela</p>
+                            </div>
                             
-                            <div style="margin-bottom: 2rem;">
+                            <div style="margin-bottom: 1.5rem;">
                                 <span class="status-badge ${statusClass}">${statusText}</span>
                             </div>
 
-                            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.1);">
-                                <p style="color: var(--accent-yellow); font-size: 0.8rem; font-weight: 800; margin-bottom: 0.5rem; text-transform: uppercase;">Pronóstico Seleccionado:</p>
-                                <p style="font-family: monospace; letter-spacing: 2px; font-size: 1.2rem; color: #fff;">${participant.predicciones}</p>
+                            <div style="background: rgba(0, 245, 255, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2);">
+                                <p style="color: var(--accent-yellow); font-size: 0.7rem; font-weight: 800; margin-bottom: 0.5rem; text-transform: uppercase;">Pronóstico Seleccionado:</p>
+                                <p style="font-family: monospace; letter-spacing: 2px; font-size: 1.1rem; color: #fff; word-break: break-all;">${participant.predicciones}</p>
                             </div>
-                        </div>
-                    `;
+                        `;
+                        gridContainer.appendChild(card);
+                    });
+                    
+                    resultContainer.appendChild(gridContainer);
                 } else {
                     resultContainer.innerHTML = `
                         <div style="text-align: center; padding: 2rem; color: var(--secondary-magenta);">
