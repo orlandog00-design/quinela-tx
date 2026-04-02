@@ -11,6 +11,16 @@
     </div>
 </section>
 
+<!-- DYNAMIC PRIZE BANNER -->
+<section style="max-width: 1400px; margin: -2rem auto 2rem; text-align: center;">
+    <div id="prize-pool-card" style="background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%); padding: 2rem; border-radius: 12px; border: 2px solid #fff; box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); display: inline-block; min-width: 320px;">
+        <h4 style="color: #000; font-weight: 900; letter-spacing: 2px; margin-bottom: 0.5rem;">🏆 BOLSA ACUMULADA 🏆</h4>
+        <div id="prize-usd" style="font-size: 3rem; font-weight: 900; color: #000; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); line-height: 1;">$0 USD</div>
+        <div id="prize-mxn" style="font-size: 1.5rem; font-weight: 700; color: #000; margin-top: 0.5rem; opacity: 0.8;">$0 MXN</div>
+        <p style="color: #000; font-size: 0.7rem; font-weight: 700; margin-top: 1rem; opacity: 0.6;">EL GANADOR SE LLEVA TODO EL PREMIO</p>
+    </div>
+</section>
+
 <section class="match-table-container wide-matrix">
     <div style="margin-bottom: 2rem; display: flex; gap: 1rem;">
         <input type="text" id="result-search" placeholder="Buscar por nombre..." style="margin-bottom: 0;">
@@ -83,6 +93,17 @@
                 const filtered = engine.search(query);
                 tableBody.innerHTML = '';
                 
+                // --- PRIZE CALCULATION (20% PROFIT FOR ADMIN) ---
+                const numParticipants = results.length; // Count total participants in DB
+                const totalPot = numParticipants * 10; // $10 per person
+                const winnerPrizeUSD = Math.floor(totalPot * 0.8); // 80% for winner
+                const winnerPrizeMXN = Math.floor(winnerPrizeUSD * 17.5); // Fixed rate of 17.5
+                
+                const prizeUsdEl = document.getElementById('prize-usd');
+                const prizeMxnEl = document.getElementById('prize-mxn');
+                if (prizeUsdEl) prizeUsdEl.textContent = `$${winnerPrizeUSD.toLocaleString()} USD`;
+                if (prizeMxnEl) prizeMxnEl.textContent = `$${winnerPrizeMXN.toLocaleString()} MXN`;
+
                 filtered.forEach((item, index) => {
                     const row = document.createElement('tr');
                     const rank = index + 1;
