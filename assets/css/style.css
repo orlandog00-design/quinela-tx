@@ -550,6 +550,38 @@ button.btn-primary:hover {
     filter: brightness(1.1);
 }
 
+/* Unified Footer (Modern & Compact) */
+footer {
+    padding: 4rem 1rem 2rem;
+    text-align: center;
+    background: rgba(10, 11, 30, 0.98);
+    border-top: 1px solid var(--glass-border);
+    margin-top: 4rem;
+}
+
+footer p {
+    color: var(--text-muted);
+    font-size: 0.75rem; /* Smaller font as requested */
+    font-family: 'Outfit', sans-serif;
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+}
+
+.social-links {
+    font-size: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+.social-links a {
+    color: var(--primary-neon) !important;
+    font-weight: 700;
+}
+
+.social-links a:hover {
+    color: var(--secondary-magenta) !important;
+    text-shadow: 0 0 10px var(--secondary-magenta);
+}
+
 /* Mobile Responsive Overhaul (Modern & Premium) */
 @media (max-width: 768px) {
     header {
