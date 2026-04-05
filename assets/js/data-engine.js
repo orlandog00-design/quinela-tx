@@ -132,6 +132,9 @@ class DataEngine {
             this.officialPicks = officialRow ? officialRow.predicciones.split('-') : [];
             this.liveScores = liveScoresRow ? liveScoresRow.predicciones.split('-') : [];
             
+            // Attempt to dynamically sync from FotMob to populate missing live scores and official results
+            await this.syncFotMob(this.getActiveJornada());
+            
             // Process participants
             this.data = rawData.filter(item => item !== officialRow && item !== liveScoresRow).map(p => {
                 const pPicks = p.predicciones.split('-');
@@ -211,6 +214,79 @@ class DataEngine {
             (item.nombre && item.nombre.toLowerCase().includes(lowerQuery)) ||
             (item.predicciones && item.predicciones.toLowerCase().includes(lowerQuery))
         );
+    }
+
+    async syncFotMob(jornada) {
+        if (!jornada || !jornada.matches) return;
+        
+        try {
+            // League 130 is Liga MX
+            const fotmobUrl = "https://www.fotmob.com/api/leagues?id=130";
+            const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(fotmobUrl);
+            const response = await fetch(proxyUrl);
+            const data = await response.json();
+            
+            if (data && data.matches && data.matches.allMatches) {
+                const fotmobMatches = data.matches.allMatches;
+                
+                const normalize = (str) => {
+                    if (!str) return "";
+                    return str.toLowerCase()
+                              .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+                              .replace("atletico de san luis", "atletico san luis")
+                              .replace("guadalajara", "chivas")
+                              .replace("monterrey", "rayados");
+                };
+
+                let computedOfficialPicks = [];
+                let computedLiveScores = [];
+
+                jornada.matches.forEach((appMatch) => {
+                    const localNorm = normalize(appMatch.local);
+                    const visitaNorm = normalize(appMatch.visita);
+                    
+                    const fotMatch = fotmobMatches.find(m => {
+                        const h = normalize(m.home?.name);
+                        const a = normalize(m.away?.name);
+                        return (h.includes(localNorm) || localNorm.includes(h)) && 
+                               (a.includes(visitaNorm) || visitaNorm.includes(a));
+                    });
+
+                    if (fotMatch && fotMatch.status && fotMatch.status.started) {
+                        // Extract numeric scores
+                        let homeScore = 0; let awayScore = 0;
+                        if (fotMatch.status.scoreStr) {
+                            const parts = fotMatch.status.scoreStr.split(' - ');
+                            homeScore = parseInt(parts[0]) || 0;
+                            awayScore = parseInt(parts[1]) || 0;
+                            computedLiveScores.push(`${homeScore} - ${awayScore}`);
+                        } else {
+                            computedLiveScores.push("VS");
+                        }
+                        
+                        if (fotMatch.status.finished) {
+                            if (homeScore > awayScore) computedOfficialPicks.push("L");
+                            else if (homeScore < awayScore) computedOfficialPicks.push("V");
+                            else computedOfficialPicks.push("E");
+                        } else {
+                            computedOfficialPicks.push("?"); // match still playing
+                        }
+                    } else {
+                        computedLiveScores.push("VS");
+                        computedOfficialPicks.push("?");
+                    }
+                });
+
+                if (this.officialPicks.length === 0 || computedOfficialPicks.some(p => p !== "?")) {
+                    this.officialPicks = computedOfficialPicks;
+                }
+                if (this.liveScores.length === 0 || computedLiveScores.some(s => s !== "VS")) {
+                    this.liveScores = computedLiveScores;
+                }
+            }
+        } catch (error) {
+            console.error("FotMob auto-sync failed:", error);
+        }
     }
 }
 
