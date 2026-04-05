@@ -220,8 +220,24 @@ class DataEngine {
         if (!jornada || !jornada.matches) return;
 
         try {
-            // Using ESPN API because FotMob's CDN blocks proxy servers
-            const espnUrl = "https://site.api.espn.com/apis/site/v2/sports/soccer/mex.1/scoreboard";
+            // Compute a safe date range from the jornada to ensure all older matches are returned
+            let startDateStr = "";
+            let endDateStr = "";
+            if (jornada.startDate && jornada.endDate) {
+                const sDate = new Date(jornada.startDate);
+                sDate.setDate(sDate.getDate() - 5);
+                startDateStr = sDate.toISOString().split('T')[0].replace(/-/g, '');
+
+                const eDate = new Date(jornada.endDate);
+                eDate.setDate(eDate.getDate() + 2);
+                endDateStr = eDate.toISOString().split('T')[0].replace(/-/g, '');
+            } else {
+                startDateStr = "20240101";
+                endDateStr = "20261231";
+            }
+
+            // Using ESPN API with explicit dates to include older matches in the round
+            const espnUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/mex.1/scoreboard?dates=${startDateStr}-${endDateStr}`;
 
             let response;
             try {
