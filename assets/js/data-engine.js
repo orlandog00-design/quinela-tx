@@ -7,10 +7,10 @@ class DataEngine {
     constructor() {
         // Read URL (CSV)
         this.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMObz19KSMXtEAcdhQzfXb8yPcMLPDjKwZjy0PyC15coaU2JLD--RwVFMoXH1BuMvc_htUoVtHos2a/pub?output=csv";
-        
+
         // Write URL (Google Apps Script - Mandatory for Registration)
         this.scriptUrl = "https://script.google.com/macros/s/AKfycbywJeMQcBb-b54z7IDL65v3CYNHFnk6PmeWKGH9wUg9PtSssRgf1CrxkatrPPx4MpOV/exec";
-        
+
         // Official Liga MX Team Logos (FotMob CDN - High Reliability)
         const logoBase = "https://images.fotmob.com/image_resources/logo/teamlogo/";
         this.TEAM_LOGOS = {
@@ -45,7 +45,7 @@ class DataEngine {
                 startDate: "2026-04-03T20:00:00",
                 matches: [
                     { local: "Puebla", visita: "Juárez" },
-// ... (matches continue)
+                    // ... (matches continue)
                     { local: "Necaxa", visita: "Mazatlán" },
                     { local: "Tijuana", visita: "Tigres" },
                     { local: "Monterrey", visita: "Atlético San Luis" },
@@ -65,7 +65,7 @@ class DataEngine {
                 startDate: "2026-04-10T20:00:00",
                 matches: [
                     { local: "Puebla", visita: "León" },
-// ... (rest remains)
+                    // ... (rest remains)
                     { local: "Juárez", visita: "Tijuana" },
                     { local: "Querétaro", visita: "Necaxa" },
                     { local: "Tigres", visita: "Chivas" },
@@ -100,11 +100,11 @@ class DataEngine {
             const cacheBustedUrl = this.url + (this.url.includes("?") ? "&" : "?") + "t=" + Date.now();
             const response = await fetch(cacheBustedUrl);
             const csvText = await response.text();
-            
+
             // Simple CSV to JSON Parser
             const lines = csvText.split('\n');
             const headers = lines[0].split(',');
-            
+
             const rawData = lines.slice(1).map(line => {
                 const values = line.split(',');
                 if (values.length < 3) return null;
@@ -118,23 +118,23 @@ class DataEngine {
             }).filter(item => item !== null && item.nombre !== "");
 
             // Find the Official Results row
-            const officialRow = rawData.find(item => 
-                item.nombre.toUpperCase() === "RESULTADOS_OFICIALES" || 
+            const officialRow = rawData.find(item =>
+                item.nombre.toUpperCase() === "RESULTADOS_OFICIALES" ||
                 item.nombre.toUpperCase() === "OFFICIAL_RESULTS"
             );
 
             // Find the Live Scores row (NEW)
-            const liveScoresRow = rawData.find(item => 
-                item.nombre.toUpperCase() === "MARCADORES_VIVO" || 
+            const liveScoresRow = rawData.find(item =>
+                item.nombre.toUpperCase() === "MARCADORES_VIVO" ||
                 item.nombre.toUpperCase() === "LIVE_SCORES"
             );
 
             this.officialPicks = officialRow ? officialRow.predicciones.split('-') : [];
             this.liveScores = liveScoresRow ? liveScoresRow.predicciones.split('-') : [];
-            
+
             // Attempt to dynamically sync from FotMob to populate missing live scores and official results
             await this.syncFotMob(this.getActiveJornada());
-            
+
             // Process participants
             this.data = rawData.filter(item => item !== officialRow && item !== liveScoresRow).map(p => {
                 const pPicks = p.predicciones.split('-');
@@ -171,19 +171,19 @@ class DataEngine {
             const payload = {
                 nombre: data.nombre,
                 predicciones: data.predicciones,
-                poblacion: data.telefono,  
+                poblacion: data.telefono,
                 metodo_pago: data.metodo_pago || "NONE",
                 status: "PENDIENTE"
             };
-            
+
             // Note: Google Apps Script requires no-cors for simple browser POSTs
             await fetch(this.scriptUrl, {
                 method: "POST",
-                mode: "no-cors", 
+                mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
-            
+
             return true; // We always return true for no-cors as it won't show response.ok
         } catch (error) {
             console.error("Error registering participant:", error);
@@ -196,7 +196,7 @@ class DataEngine {
         if (lines.length === 0) return [];
 
         const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-        
+
         return lines.slice(1).map(line => {
             const values = line.split(',');
             const entry = {};
@@ -210,7 +210,7 @@ class DataEngine {
     search(query) {
         if (!query) return this.data;
         const lowerQuery = query.toLowerCase();
-        return this.data.filter(item => 
+        return this.data.filter(item =>
             (item.nombre && item.nombre.toLowerCase().includes(lowerQuery)) ||
             (item.predicciones && item.predicciones.toLowerCase().includes(lowerQuery))
         );
@@ -218,24 +218,32 @@ class DataEngine {
 
     async syncFotMob(jornada) {
         if (!jornada || !jornada.matches) return;
-        
+
         try {
-            // League 130 is Liga MX
-            const fotmobUrl = "https://www.fotmob.com/api/leagues?id=130";
-            const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(fotmobUrl);
-            const response = await fetch(proxyUrl);
+            // Using ESPN API because FotMob's CDN blocks proxy servers
+            const espnUrl = "https://site.api.espn.com/apis/site/v2/sports/soccer/mex.1/scoreboard";
+
+            let response;
+            try {
+                response = await fetch(espnUrl);
+            } catch (e) {
+                // Fallback proxy if strict CORS blocks direct ESPN fetch
+                const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(espnUrl);
+                response = await fetch(proxyUrl);
+            }
+
             const data = await response.json();
-            
-            if (data && data.matches && data.matches.allMatches) {
-                const fotmobMatches = data.matches.allMatches;
-                
+
+            if (data && data.events) {
+                const espnMatches = data.events;
+
                 const normalize = (str) => {
                     if (!str) return "";
                     return str.toLowerCase()
-                              .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
-                              .replace("atletico de san luis", "atletico san luis")
-                              .replace("guadalajara", "chivas")
-                              .replace("monterrey", "rayados");
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+                        .replace("atletico de san luis", "atletico san luis")
+                        .replace("guadalajara", "chivas")
+                        .replace("monterrey", "rayados");
                 };
 
                 let computedOfficialPicks = [];
@@ -244,32 +252,37 @@ class DataEngine {
                 jornada.matches.forEach((appMatch) => {
                     const localNorm = normalize(appMatch.local);
                     const visitaNorm = normalize(appMatch.visita);
-                    
-                    const fotMatch = fotmobMatches.find(m => {
-                        const h = normalize(m.home?.name);
-                        const a = normalize(m.away?.name);
-                        return (h.includes(localNorm) || localNorm.includes(h)) && 
-                               (a.includes(visitaNorm) || visitaNorm.includes(a));
+
+                    const espnMatch = espnMatches.find(m => {
+                        const eventName = normalize(m.name);
+                        const comp1 = m.competitions[0]?.competitors[0]?.team?.name ? normalize(m.competitions[0].competitors[0].team.name) : "";
+                        const comp2 = m.competitions[0]?.competitors[1]?.team?.name ? normalize(m.competitions[0].competitors[1].team.name) : "";
+                        return (eventName.includes(localNorm) || comp1.includes(localNorm) || comp2.includes(localNorm)) &&
+                            (eventName.includes(visitaNorm) || comp1.includes(visitaNorm) || comp2.includes(visitaNorm));
                     });
 
-                    if (fotMatch && fotMatch.status && fotMatch.status.started) {
-                        // Extract numeric scores
-                        let homeScore = 0; let awayScore = 0;
-                        if (fotMatch.status.scoreStr) {
-                            const parts = fotMatch.status.scoreStr.split(' - ');
-                            homeScore = parseInt(parts[0]) || 0;
-                            awayScore = parseInt(parts[1]) || 0;
+                    if (espnMatch && espnMatch.competitions && espnMatch.competitions[0]) {
+                        const status = espnMatch.status.type.state; // 'pre', 'in', 'post'
+                        const comps = espnMatch.competitions[0].competitors;
+
+                        const homeTeam = comps.find(c => c.homeAway === 'home') || comps[0];
+                        const awayTeam = comps.find(c => c.homeAway === 'away') || comps[1];
+
+                        if (status === 'in' || status === 'post') {
+                            const homeScore = parseInt(homeTeam.score) || 0;
+                            const awayScore = parseInt(awayTeam.score) || 0;
                             computedLiveScores.push(`${homeScore} - ${awayScore}`);
+
+                            if (status === 'post') {
+                                if (homeScore > awayScore) computedOfficialPicks.push("L");
+                                else if (homeScore < awayScore) computedOfficialPicks.push("V");
+                                else computedOfficialPicks.push("E");
+                            } else {
+                                computedOfficialPicks.push("?"); // match still playing
+                            }
                         } else {
                             computedLiveScores.push("VS");
-                        }
-                        
-                        if (fotMatch.status.finished) {
-                            if (homeScore > awayScore) computedOfficialPicks.push("L");
-                            else if (homeScore < awayScore) computedOfficialPicks.push("V");
-                            else computedOfficialPicks.push("E");
-                        } else {
-                            computedOfficialPicks.push("?"); // match still playing
+                            computedOfficialPicks.push("?");
                         }
                     } else {
                         computedLiveScores.push("VS");
@@ -285,7 +298,7 @@ class DataEngine {
                 }
             }
         } catch (error) {
-            console.error("FotMob auto-sync failed:", error);
+            console.error("ESPN auto-sync failed:", error);
         }
     }
 }
