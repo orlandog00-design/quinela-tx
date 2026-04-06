@@ -35,6 +35,9 @@
         <h4 style="color: #ffd700; font-weight: 900; letter-spacing: 1px; margin-bottom: 0.5rem; font-size: 0.8rem;">🔥 JACKPOT DE GOLES 🔥</h4>
         <div id="jackpot-total" style="font-size: 2.5rem; font-weight: 900; color: #fff;">0</div>
         <p style="color: #fff; font-size: 0.7rem; opacity: 0.7;">GOLES TOTALES EN LA JORNADA</p>
+        <div id="jackpot-winners" style="margin-top: 1rem; font-size: 0.85rem; color: #00ff00; font-weight: 800; min-height: 1.2rem;">
+            <!-- Jackpot winners will appear here -->
+        </div>
         <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(255,215,0,0.1); border-radius: 5px; font-size: 0.75rem; color: #ffd700; font-weight: 700;">
             PREMIO: $30 USD / $525 MXN EXTRA
         </div>
@@ -128,11 +131,35 @@
                     winnerDisplay.style.display = 'none';
                 }
 
-                // --- JACKPOT TOTAL CALCULATION ---
-                // We use the global results (non-filtered) to find the jackpot and other metadata rows
-                const jackpotRow = results.find(item => item.nombre.toUpperCase() === "MARCADOR_JACKPOT_GOLES");
+                // --- JACKPOT CALCULATIONS ---
+                let calculatedTotalGoles = 0;
+                if (engine.liveScores) {
+                    engine.liveScores.forEach(scoreStr => {
+                        if (scoreStr && scoreStr.includes('-')) {
+                            const [s1, s2] = scoreStr.split('-').map(n => parseInt(n.trim()));
+                            if (!isNaN(s1) && !isNaN(s2)) calculatedTotalGoles += (s1 + s2);
+                        }
+                    });
+                }
+
                 const jackpotTotalEl = document.getElementById('jackpot-total');
-                if (jackpotTotalEl && jackpotRow) jackpotTotalEl.textContent = jackpotRow.predicciones || "0";
+                if (jackpotTotalEl) jackpotTotalEl.textContent = calculatedTotalGoles;
+
+                // Find Jackpot Winners
+                const jackpotWinners = results.filter(p => {
+                    const guess = parseInt(p.jackpot_goles);
+                    return !isNaN(guess) && guess === calculatedTotalGoles && p.status === "PAGADO";
+                });
+
+                const jackpotWinnersEl = document.getElementById('jackpot-winners');
+                if (jackpotWinnersEl) {
+                    if (jackpotWinners.length > 0) {
+                        const winnerNames = jackpotWinners.map(w => w.nombre).join(', ');
+                        jackpotWinnersEl.innerHTML = `🏆 GANADOR(ES):<br>${winnerNames}`;
+                    } else {
+                        jackpotWinnersEl.innerHTML = `<span>SIN GANADOR AÚN</span>`;
+                    }
+                }
 
                 // Map results for table display
                 const finalResults = results.filter(item => 
