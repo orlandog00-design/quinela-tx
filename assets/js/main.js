@@ -68,6 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const matchList = document.getElementById('match-list');
+    const jornadaDisplay = document.getElementById('jornada-display');
+    const countdownElement = document.getElementById('countdown');
+    const predictionForm = document.getElementById('prediction-form');
+    const sideBetToggle = document.getElementById('side-bet-toggle');
+    const zelleInstructions = document.getElementById('zelle-instructions');
+    const zelleScreenshot = document.getElementById('zelle-screenshot');
+    const finalizeBtn = document.getElementById('finalizar-btn');
     const lockMsg = document.getElementById('lock-msg');
     const homeJornadaSelect = document.getElementById('jornada-select-home');
     const predictionSection = document.getElementById('registro');
