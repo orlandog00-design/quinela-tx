@@ -42,7 +42,7 @@
     <main>
         <section class="hero" style="padding: 4rem 1rem;">
     <h1>RESULTADOS OFICIALES</h1>
-    <h3>LIGA MX | JORNADA 13</h3>
+    <h3 id="jornada-header-display">LIGA MX | CARGANDO...</h3>
     <p style="margin-top: 1rem; color: var(--text-muted);">Consulta la tabla general y los puntos acumulados de todos los participantes validados.</p>
     <div style="margin-top: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
         <div style="background: rgba(0, 245, 255, 0.1); border: 1px solid var(--primary-neon); padding: 0.8rem; border-radius: 8px; display: inline-block; font-size: 0.85rem; color: var(--primary-neon); font-weight: 700;">
@@ -124,10 +124,16 @@
             const winnerList = document.getElementById('winner-list');
 
             // --- INITIALIZE JORNADA DROPDOWN ---
+            const activeId = engine.getActiveJornada().id;
             engine.LIGA_CALENDAR.forEach(j => {
                 const opt = document.createElement('option');
                 opt.value = j.id;
-                opt.textContent = j.name;
+                
+                let label = j.name;
+                if (j.id < activeId) label += " (CERRADA)";
+                else if (j.id === activeId) label += " (ACTIVA)";
+                
+                opt.textContent = label;
                 if (j.id === engine.selectedJornadaId) opt.selected = true;
                 jornadaSelect.appendChild(opt);
             });
@@ -140,6 +146,11 @@
                     tableBody.innerHTML = '<tr><td colspan="3">Error al cargar datos.</td></tr>';
                     return;
                 }
+
+                // Dynamic UI components
+                document.title = `RESULTADOS | LIGA MX ${currentJornada.name}`;
+                const jHeader = document.getElementById('jornada-header-display');
+                if (jHeader) jHeader.textContent = `LIGA MX | ${currentJornada.name}`;
 
                 // --- WINNER HIGHLIGHT LOGIC ---
                 const winners = engine.getWinners();

@@ -94,9 +94,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Render Matches
     if (activeJornada && activeJornada.matches && matchList) {
         matchList.innerHTML = "";
-        jornadaDisplay.textContent = activeJornada.name;
-        document.getElementById('reg-inicia').textContent = activeJornada.inicia || "--/--/----";
-        document.getElementById('reg-cierre').textContent = activeJornada.cierre || "--/--/----";
+        
+        // Dynamic Titles and Headers
+        document.title = `SPORTS KING QUINIELA | LIGA MX ${activeJornada.name}`;
+        if (jornadaDisplay) jornadaDisplay.textContent = activeJornada.name;
+        
+        const regIniciaEl = document.getElementById('reg-inicia');
+        const regCierreEl = document.getElementById('reg-cierre');
+        if (regIniciaEl) regIniciaEl.textContent = activeJornada.inicia || "--/--/----";
+        if (regCierreEl) regCierreEl.textContent = activeJornada.cierre || "--/--/----";
 
         activeJornada.matches.forEach(match => {
             const row = document.createElement('tr');
