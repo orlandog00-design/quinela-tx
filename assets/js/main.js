@@ -68,43 +68,71 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 1. Core Selections
-    const matchList = document.getElementById('match-list');
-    const jornadaDisplay = document.getElementById('jornada-display');
-    const countdownElement = document.getElementById('countdown');
-    const predictionForm = document.getElementById('prediction-form');
-    const sideBetToggle = document.getElementById('side-bet-toggle');
-    const zelleInstructions = document.getElementById('zelle-instructions');
-    const zelleScreenshot = document.getElementById('zelle-screenshot');
-    const finalizeBtn = document.getElementById('finalizar-btn');
     const lockMsg = document.getElementById('lock-msg');
+    const homeJornadaSelect = document.getElementById('jornada-select-home');
+    const predictionSection = document.getElementById('registro');
     
     // State
     let paymentMethod = "";
     let paypalDone = false;
     let zelleDone = false;
-    const activeJornada = engine.getActiveJornada();
+    let activeJornadaGlobal = engine.getActiveJornada();
 
-    // 2. Initialize Jackpot State
-    window.updateJackpotLinks();
-    if (sideBetToggle) {
-        sideBetToggle.addEventListener('change', window.updateJackpotLinks);
+    // 2. Initialize Dropdowns (Home)
+    if (homeJornadaSelect) {
+        const activeId = activeJornadaGlobal.id;
+        engine.LIGA_CALENDAR.forEach(j => {
+            const opt = document.createElement('option');
+            opt.value = j.id;
+            let label = j.name;
+            if (j.id < activeId) label += " (CERRADA)";
+            else if (j.id === activeId) label += " (ACTIVA)";
+            opt.textContent = label;
+            if (j.id === activeId) opt.selected = true;
+            homeJornadaSelect.appendChild(opt);
+        });
+
+        homeJornadaSelect.addEventListener('change', (e) => {
+            const selectedId = parseInt(e.target.value);
+            const selectedJornada = engine.LIGA_CALENDAR.find(j => j.id === selectedId);
+            renderMatches(selectedJornada);
+        });
     }
 
-    // 3. Render Matches
-    if (activeJornada && activeJornada.matches && matchList) {
+    // 3. Render Matches Function
+    function renderMatches(jornada) {
+        if (!jornada || !jornada.matches || !matchList) return;
+        
+        const activeId = activeJornadaGlobal.id;
+        const isClosed = jornada.id < activeId;
+
         matchList.innerHTML = "";
         
-        // Dynamic Titles and Headers
-        document.title = `SPORTS KING QUINIELA | LIGA MX ${activeJornada.name}`;
-        if (jornadaDisplay) jornadaDisplay.textContent = activeJornada.name;
+        // Update Titles
+        document.title = `SPORTS KING QUINIELA | LIGA MX ${jornada.name}`;
+        if (jornadaDisplay) jornadaDisplay.textContent = jornada.name;
         
         const regIniciaEl = document.getElementById('reg-inicia');
         const regCierreEl = document.getElementById('reg-cierre');
-        if (regIniciaEl) regIniciaEl.textContent = activeJornada.inicia || "--/--/----";
-        if (regCierreEl) regCierreEl.textContent = activeJornada.cierre || "--/--/----";
+        if (regIniciaEl) regIniciaEl.textContent = jornada.inicia || "--/--/----";
+        if (regCierreEl) regCierreEl.textContent = jornada.cierre || "--/--/----";
 
-        activeJornada.matches.forEach(match => {
+        // Registration form visibility
+        if (predictionSection) {
+            if (isClosed) {
+                // Show a banner or just hide the form?
+                // Better approach: disable the inputs and show "CLOSED"
+                predictionSection.style.opacity = "0.5";
+                predictionSection.style.pointerEvents = "none";
+                if (finalizeBtn) finalizeBtn.textContent = "REGISTRO CERRADO";
+            } else {
+                predictionSection.style.opacity = "1";
+                predictionSection.style.pointerEvents = "auto";
+                if (finalizeBtn) finalizeBtn.textContent = "Finaliza Tu Registro";
+            }
+        }
+
+        jornada.matches.forEach(match => {
             const row = document.createElement('tr');
             const localLogo = engine.TEAM_LOGOS[match.local] || "https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_Unknown.png";
             const visitaLogo = engine.TEAM_LOGOS[match.visita] || "https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_Unknown.png";
@@ -117,29 +145,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="team-info"><img src="${visitaLogo}" class="team-logo"><span>${match.visita}</span></div>
                     </div>
                 </td>
-                <td><span class="choice-box">L</span></td>
-                <td><span class="choice-box">E</span></td>
-                <td><span class="choice-box">V</span></td>
+                <td><span class="choice-box ${isClosed ? 'disabled' : ''}">L</span></td>
+                <td><span class="choice-box ${isClosed ? 'disabled' : ''}">E</span></td>
+                <td><span class="choice-box ${isClosed ? 'disabled' : ''}">V</span></td>
             `;
             matchList.appendChild(row);
         });
 
-        // Attach pick listeners
-        document.querySelectorAll('.choice-box').forEach(box => {
-            box.addEventListener('click', () => {
-                const row = box.closest('tr');
-                row.querySelectorAll('.choice-box').forEach(b => b.classList.remove('active'));
-                box.classList.add('active');
-                checkStatus();
+        // Attach pick listeners (Only if not closed)
+        if (!isClosed) {
+            document.querySelectorAll('.choice-box').forEach(box => {
+                box.addEventListener('click', () => {
+                    const row = box.closest('tr');
+                    row.querySelectorAll('.choice-box').forEach(b => b.classList.remove('active'));
+                    box.classList.add('active');
+                    checkStatus();
+                });
             });
-        });
-
-        // 3.5 Update Homepage Prize Pool
-        updateHomePrizePool();
+        }
+        
+        // Update Home Prize Pool
+        updateHomePrizePool(jornada.id);
     }
 
-    async function updateHomePrizePool() {
-        const results = await engine.fetchData();
+    async function updateHomePrizePool(jornadaId = null) {
+        const results = await engine.fetchData(jornadaId);
         const paidParticipants = results.filter(p => p.status === "PAGADO").length;
 
         const prizeUsdEl = document.getElementById('home-prize-usd');
@@ -155,6 +185,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (prizeMxnEl) prizeMxnEl.textContent = `$${prizeMXN.toLocaleString()} MXN`;
         }
     }
+
+    // 2. Initialize Jackpot State
+    window.updateJackpotLinks();
+    if (sideBetToggle) {
+        sideBetToggle.addEventListener('change', window.updateJackpotLinks);
+    }
+
+    // --- 3. INITIAL LOAD ---
+    renderMatches(activeJornadaGlobal);
 
     // 4. Unlock Logic
     function checkStatus() {
@@ -269,8 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 7. Countdown
-    if (countdownElement && activeJornada) {
-        const targetDate = new Date(activeJornada.startDate).getTime();
+    if (countdownElement && activeJornadaGlobal) {
+        const targetDate = new Date(activeJornadaGlobal.startDate).getTime();
         const timer = setInterval(() => {
             const now = new Date().getTime();
             const distance = targetDate - now;

@@ -41,7 +41,7 @@ class DataEngine {
                 name: "JORNADA 13",
                 inicia: "31/Mar/2026 Al 3/Abr/2026",
                 cierre: "3/Abr/2026 a las 20:00 hrs.",
-                endDate: "2026-04-06T23:59:59",
+                endDate: "2026-04-05T23:59:59",
                 startDate: "2026-04-03T20:00:00",
                 matches: [
                     { local: "Puebla", visita: "Juárez" },
