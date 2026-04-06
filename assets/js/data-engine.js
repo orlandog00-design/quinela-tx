@@ -79,6 +79,7 @@ class DataEngine {
         ];
 
         this.data = [];
+        this.selectedJornadaId = this.getActiveJornada().id;
     }
 
     getActiveJornada() {
@@ -94,7 +95,9 @@ class DataEngine {
         return this.LIGA_CALENDAR[this.LIGA_CALENDAR.length - 1];
     }
 
-    async fetchData() {
+    async fetchData(jornadaId = null) {
+        if (jornadaId) this.selectedJornadaId = parseInt(jornadaId);
+        
         try {
             // Cache-buster to ensure mobile browsers get FRESH data from the sheet
             const cacheBustedUrl = this.url + (this.url.includes("?") ? "&" : "?") + "t=" + Date.now();
@@ -103,27 +106,32 @@ class DataEngine {
 
             // Simple CSV to JSON Parser
             const lines = csvText.split('\n');
-            const headers = lines[0].split(',');
-
             const rawData = lines.slice(1).map(line => {
                 const values = line.split(',');
                 if (values.length < 3) return null;
+                
+                const jId = parseInt(values[5]?.trim()) || 13; // Default to 13 for legacy data
+                
                 return {
                     nombre: values[0]?.trim(),
                     predicciones: values[1]?.trim(),
                     pts: parseInt(values[2]?.trim()) || 0,
                     telefono: values[3]?.trim(),
-                    status: values[4]?.trim() || "PENDIENTE"
+                    status: values[4]?.trim() || "PENDIENTE",
+                    jornadaId: jId
                 };
             }).filter(item => item !== null && item.nombre !== "");
 
-            // Find the Official Results row
+            // Filter by selected Jornada
+            const filteredData = rawData.filter(item => item.jornadaId === this.selectedJornadaId);
+
+            // Find the Official Results row (Always check the whole sheet for the latest)
             const officialRow = rawData.find(item =>
                 item.nombre.toUpperCase() === "RESULTADOS_OFICIALES" ||
                 item.nombre.toUpperCase() === "OFFICIAL_RESULTS"
             );
 
-            // Find the Live Scores row (NEW)
+            // Find the Live Scores row
             const liveScoresRow = rawData.find(item =>
                 item.nombre.toUpperCase() === "MARCADORES_VIVO" ||
                 item.nombre.toUpperCase() === "LIVE_SCORES"
@@ -132,11 +140,13 @@ class DataEngine {
             this.officialPicks = officialRow ? officialRow.predicciones.split('-') : [];
             this.liveScores = liveScoresRow ? liveScoresRow.predicciones.split('-') : [];
 
-            // Attempt to dynamically sync from FotMob to populate missing live scores and official results
-            await this.syncFotMob(this.getActiveJornada());
+            // Attempt to dynamically sync from ESPN to populate missing live scores and official results
+            // Note: We sync the active one from the calendar, or the selected one if it's in calendar
+            const targetJornada = this.LIGA_CALENDAR.find(j => j.id === this.selectedJornadaId) || this.getActiveJornada();
+            await this.syncFotMob(targetJornada);
 
-            // Process participants
-            this.data = rawData.filter(item => item !== officialRow && item !== liveScoresRow).map(p => {
+            // Process participants for the SELECTED jornada
+            this.data = filteredData.filter(item => item !== officialRow && item !== liveScoresRow).map(p => {
                 const pPicks = p.predicciones.split('-');
                 let computedPts = 0;
                 const status = pPicks.map((pick, index) => {
@@ -149,9 +159,9 @@ class DataEngine {
 
                 return {
                     ...p,
-                    computedPts: computedPts, // We use this for highlighting
+                    computedPts: computedPts,
                     pickStatus: status,
-                    paymentStatus: p.status // This will be used in Verificador
+                    paymentStatus: p.status
                 };
             });
 
@@ -165,6 +175,13 @@ class DataEngine {
         }
     }
 
+    getWinners() {
+        if (!this.data || this.data.length === 0) return [];
+        const maxPts = Math.max(...this.data.map(p => p.computedPts || p.pts));
+        if (maxPts === 0 && this.officialPicks.every(p => p === "?")) return []; // Don't show winners if no games played
+        return this.data.filter(p => (p.computedPts || p.pts) === maxPts && (p.computedPts || p.pts) > 0);
+    }
+
     async registerParticipant(data) {
         try {
             // Initial status is PENDIENTE until the admin verifies the funds
@@ -173,7 +190,8 @@ class DataEngine {
                 predicciones: data.predicciones,
                 poblacion: data.telefono,
                 metodo_pago: data.metodo_pago || "NONE",
-                status: "PENDIENTE"
+                status: "PENDIENTE",
+                jornada: this.selectedJornadaId
             };
 
             // Note: Google Apps Script requires no-cors for simple browser POSTs

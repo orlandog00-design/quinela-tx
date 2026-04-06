@@ -6,8 +6,18 @@
     <h1>RESULTADOS OFICIALES</h1>
     <h3>LIGA MX | JORNADA 13</h3>
     <p style="margin-top: 1rem; color: var(--text-muted);">Consulta la tabla general y los puntos acumulados de todos los participantes validados.</p>
-    <div style="margin-top: 1.5rem; background: rgba(0, 245, 255, 0.1); border: 1px solid var(--primary-neon); padding: 0.8rem; border-radius: 8px; display: inline-block; font-size: 0.85rem; color: var(--primary-neon); font-weight: 700;">
-        🕒 NOTA: Resultados actualizados automáticamente cada 15 minutos (Sincronizado con FotMob)
+    <div style="margin-top: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        <div style="background: rgba(0, 245, 255, 0.1); border: 1px solid var(--primary-neon); padding: 0.8rem; border-radius: 8px; display: inline-block; font-size: 0.85rem; color: var(--primary-neon); font-weight: 700;">
+            🕒 NOTA: Resultados actualizados automáticamente cada 15 minutos (Sincronizado con ESPN)
+        </div>
+        
+        <!-- JORNADA SELECTOR -->
+        <div style="margin-top: 1rem;">
+            <label for="jornada-select" style="font-weight: 800; margin-right: 0.5rem; color: #fff;">MOSTRAR:</label>
+            <select id="jornada-select" style="background: #1a1b3a; color: #fff; border: 1px solid var(--primary-neon); padding: 0.5rem 1rem; border-radius: 5px; font-weight: 700; cursor: pointer; outline: none;">
+                <!-- Options will be injected by JS -->
+            </select>
+        </div>
     </div>
 </section>
 
@@ -27,6 +37,17 @@
         <p style="color: #fff; font-size: 0.7rem; opacity: 0.7;">GOLES TOTALES EN LA JORNADA</p>
         <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(255,215,0,0.1); border-radius: 5px; font-size: 0.75rem; color: #ffd700; font-weight: 700;">
             PREMIO: $30 USD / $525 MXN EXTRA
+        </div>
+    </div>
+</section>
+
+<!-- WINNER DISPLAY SECTION (HIDDEN BY DEFAULT) -->
+<section id="winner-display" style="display: none; max-width: 1400px; margin: 0 auto 2rem; text-align: center;">
+    <div class="card" style="border: 2px solid #ffd700; background: rgba(255, 215, 0, 0.05); padding: 2rem; border-radius: 15px; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -10px; right: -10px; font-size: 4rem; opacity: 0.1; color: #ffd700;"><i class="fas fa-crown"></i></div>
+        <h2 style="color: #ffd700; font-weight: 900; letter-spacing: 3px; font-size: 1.8rem;">🏆 GANADOR(ES) DE LA JORNADA 🏆</h2>
+        <div id="winner-list" style="margin-top: 1.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem;">
+            <!-- Winners will be injected here -->
         </div>
     </div>
 </section>
@@ -60,38 +81,60 @@
             const tableBody = document.querySelector('#results-table tbody');
             const headerRow = document.getElementById('table-header-row');
             const searchInput = document.getElementById('result-search');
+            const jornadaSelect = document.getElementById('jornada-select');
+            const winnerDisplay = document.getElementById('winner-display');
+            const winnerList = document.getElementById('winner-list');
 
-            async function refreshTable(query = "") {
-                const results = await engine.fetchData();
-                const activeJornada = engine.getActiveJornada();
+            // --- INITIALIZE JORNADA DROPDOWN ---
+            engine.LIGA_CALENDAR.forEach(j => {
+                const opt = document.createElement('option');
+                opt.value = j.id;
+                opt.textContent = j.name;
+                if (j.id === engine.selectedJornadaId) opt.selected = true;
+                jornadaSelect.appendChild(opt);
+            });
 
-                if (!results || !activeJornada) {
+            async function refreshTable(query = "", jornadaId = null) {
+                const results = await engine.fetchData(jornadaId);
+                const currentJornada = engine.LIGA_CALENDAR.find(j => j.id === engine.selectedJornadaId) || engine.getActiveJornada();
+
+                if (!results || !currentJornada) {
                     tableBody.innerHTML = '<tr><td colspan="3">Error al cargar datos.</td></tr>';
                     return;
                 }
 
+                // --- WINNER HIGHLIGHT LOGIC ---
+                const winners = engine.getWinners();
+                if (winners.length > 0) {
+                    winnerDisplay.style.display = 'block';
+                    winnerList.innerHTML = winners.map(w => `
+                        <div class="winner-card" style="background: rgba(255,255,255,0.05); padding: 1rem 2rem; border-radius: 10px; border: 1px solid #ffd700; min-width: 200px;">
+                            <div style="font-size: 1.2rem; font-weight: 900; color: #fff;">${w.nombre}</div>
+                            <div style="color: #ffd700; font-weight: 800; font-size: 1.4rem;">${w.computedPts || w.pts} <small>PTS</small></div>
+                        </div>
+                    `).join('');
+                } else {
+                    winnerDisplay.style.display = 'none';
+                }
+
                 // --- JACKPOT TOTAL CALCULATION ---
+                // We use the global results (non-filtered) to find the jackpot and other metadata rows
                 const jackpotRow = results.find(item => item.nombre.toUpperCase() === "MARCADOR_JACKPOT_GOLES");
                 const jackpotTotalEl = document.getElementById('jackpot-total');
                 if (jackpotTotalEl && jackpotRow) jackpotTotalEl.textContent = jackpotRow.predicciones || "0";
 
-                // Filter out the jackpot and other metadata rows from the main table
+                // Map results for table display
                 const finalResults = results.filter(item => 
                     item.nombre.toUpperCase() !== "RESULTADOS_OFICIALES" && 
                     item.nombre.toUpperCase() !== "MARCADORES_VIVO" &&
                     item.nombre.toUpperCase() !== "MARCADOR_JACKPOT_GOLES"
                 );
 
-                // Sort results by computed PTS (Highest first)
-                finalResults.sort((a, b) => (b.computedPts || 0) - (a.computedPts || 0));
-
-                /* ... existing code ... */
-
                 // 1. Build Match Header
                 const existingHeaders = headerRow.querySelectorAll('.match-header-cell');
                 existingHeaders.forEach(h => h.remove());
 
-                activeJornada.matches.forEach((match, idx) => {
+                currentJornada.matches.forEach((match, idx) => {
                     const th = document.createElement('th');
                     th.className = 'match-header-cell';
                     
@@ -109,7 +152,6 @@
                             <img src="${visitaLogo}" alt="${match.visita}">
                         </div>
                     `;
-                    // Insert before the PTS column
                     headerRow.insertBefore(th, headerRow.lastElementChild);
                 });
 
@@ -117,7 +159,7 @@
                 const filtered = engine.search(query);
                 tableBody.innerHTML = '';
                 
-                // --- PRIZE CALCULATION (SYNCED WITH HOME) ---
+                // --- PRIZE CALCULATION ---
                 const numParticipants = results.length; 
                 const prizeUsdEl = document.getElementById('prize-usd');
                 const prizeMxnEl = document.getElementById('prize-mxn');
@@ -126,7 +168,7 @@
                     if (prizeUsdEl) prizeUsdEl.textContent = "TBD";
                     if (prizeMxnEl) prizeMxnEl.textContent = "Calculando bolsa...";
                 } else {
-                    const totalPot = numParticipants * 10; // $10 per person (Winner takes all)
+                    const totalPot = numParticipants * 10;
                     const totalPotMXN = Math.floor(totalPot * 17.5);
                     if (prizeUsdEl) prizeUsdEl.textContent = `$${totalPot.toLocaleString()} USD`;
                     if (prizeMxnEl) prizeMxnEl.textContent = `$${totalPotMXN.toLocaleString()} MXN`;
@@ -137,9 +179,8 @@
                     const rank = index + 1;
                     const rankClass = rank === 1 ? 'rank-gold' : '';
                     
-                    // Generate individual pick status cells
                     const pickCellsHtml = item.pickStatus.map((status, idx) => {
-                        const picks = item.predicciones.split('-');
+                        const picks = item.predicciones ? item.predicciones.split('-') : [];
                         const char = picks[idx] || "?";
                         return `<td style="text-align: center;"><div class="pick-dot ${status}">${char}</div></td>`;
                     }).join('');
@@ -158,6 +199,12 @@
 
             // Initial load
             await refreshTable();
+
+            // DROPDOWN CHANGE
+            jornadaSelect.addEventListener('change', async (e) => {
+                tableBody.innerHTML = '<tr><td colspan="3">Cargando datos históricos...</td></tr>';
+                await refreshTable("", e.target.value);
+            });
 
             // Search logic
             searchInput.addEventListener('input', async (e) => {
