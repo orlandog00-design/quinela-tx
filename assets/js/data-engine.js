@@ -124,10 +124,23 @@ class DataEngine {
             const targetJornada = this.LIGA_CALENDAR.find(j => j.id === this.selectedJornadaId) || this.getActiveJornada();
             await this.syncFotMob(targetJornada);
 
-            // Universal Translator: Map varied spreadsheet headers to standard properties
             this.data = rawData.filter(item => {
                 const n = (item.nombre || item.participante || "").toString().toUpperCase();
-                return n && !["RESULTADOS_OFICIALES", "MARCADORES_VIVO", "SYSTEM"].includes(n);
+                
+                // Detect Jornada (from 'jornada' header or fallback)
+                const itemJornada = parseInt(item.jornada || 0);
+                const targetJornada = parseInt(this.selectedJornadaId);
+                
+                if (n === "" || ["RESULTADOS_OFICIALES", "MARCADORES_VIVO", "SYSTEM"].includes(n)) return false;
+
+                // STRICT FILTERING: If a jornada is specified, it MUST match the selected one.
+                // If J13 is closed and J14 is selected, hide J13 people.
+                if (itemJornada > 0) {
+                    return itemJornada === targetJornada;
+                }
+                
+                // Fallback for older records without a jornada column (legacy)
+                return targetJornada === 13; // Assume legacy rows were from the first week (J13)
             }).map(p => {
                 // Detect picks from varied header names
                 const rawPicks = p.picks || p.predicciones || p['los 9 pronósticos'] || "";
