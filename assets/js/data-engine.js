@@ -8,8 +8,8 @@ class DataEngine {
         // Read URL (CSV)
         this.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMObz19KSMXtEAcdhQzfXb8yPcMLPDjKwZjy0PyC15coaU2JLD--RwVFMoXH1BuMvc_htUoVtHos2a/pub?output=csv";
 
-        // Write URL (Google Apps Script - Ultimate Sync v3.9b FINAL)
-        this.scriptUrl = "https://script.google.com/macros/s/AKfycbwOYS8323xieSI1stl_ouNkLYObaOcgwx4GQEFjZJx4h7Knb5rXa3grKN0ETPVY-L4T/exec";
+        // Write URL (Google Apps Script - Master Final v4.0)
+        this.scriptUrl = "https://script.google.com/macros/s/AKfycbzNirXOAfLXnDLie06G8yDQqJZHGBmfVjI8FSUTQ1PhAGpS6oTUd8Ke_jJGTn4-LtuB/exec";
 
         // Official Liga MX Team Logos (FotMob CDN - High Reliability)
         const logoBase = "https://images.fotmob.com/image_resources/logo/teamlogo/";
@@ -124,30 +124,36 @@ class DataEngine {
             const targetJornada = this.LIGA_CALENDAR.find(j => j.id === this.selectedJornadaId) || this.getActiveJornada();
             await this.syncFotMob(targetJornada);
 
-            // Process participants for the SELECTED jornada
-            this.data = rawData.filter(item => 
-                item.nombre && 
-                item.nombre.toUpperCase() !== "RESULTADOS_OFICIALES" && 
-                item.nombre.toUpperCase() !== "MARCADORES_VIVO" &&
-                item.nombre.toUpperCase() !== "MARCADOR_JACKPOT_GOLES"
-            ).map(p => {
-                const pPicks = p.predicciones ? p.predicciones.split('-') : [];
+            // Universal Translator: Map varied spreadsheet headers to standard properties
+            this.data = rawData.filter(item => {
+                const n = (item.nombre || item.participante || "").toString().toUpperCase();
+                return n && !["RESULTADOS_OFICIALES", "MARCADORES_VIVO", "SYSTEM"].includes(n);
+            }).map(p => {
+                // Detect picks from varied header names
+                const rawPicks = p.picks || p.predicciones || p['los 9 pronósticos'] || "";
+                const pPicks = rawPicks.toString().split('-');
+                
+                // Detect status
+                const pStatus = (p.status || p.estatus || p.estado || "PAGADO").toString().toUpperCase();
+
                 let computedPts = 0;
                 const status = pPicks.map((pick, index) => {
                     const official = this.officialPicks[index];
                     if (!official || official === "" || official === "?") return 'pending';
-                    const isCorrect = pick.toUpperCase() === official.toUpperCase();
+                    const isCorrect = pick.trim().toUpperCase() === official.trim().toUpperCase();
                     if (isCorrect) computedPts++;
                     return isCorrect ? 'correct' : 'incorrect';
                 });
 
                 return {
                     ...p,
-                    pts: parseInt(p.puntos) || 0,
+                    nombre: p.nombre || p.participante,
+                    pts: parseInt(p.puntos || p.pts) || computedPts,
                     computedPts: computedPts,
                     pickStatus: status,
-                    paymentStatus: p.status || "PENDIENTE",
-                    jackpot_goles: p.jackpot_goles || "NO"
+                    paymentStatus: pStatus,
+                    whatsapp: p.whatsapp || p.telefono,
+                    jackpot_goles: p.jackpot_goles || p['goles jackpot'] || "NO"
                 };
             });
 
