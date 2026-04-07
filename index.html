@@ -130,19 +130,19 @@
                     ¡Si aciertas el número exacto ganas el **JACKPOT de $30 USD / $525 MXN**!
                 </p>
                 
-                <label id="jackpot-toggle-label" class="payment-method-card" style="display: flex; align-items: center; justify-content: center; gap: 1rem; cursor: pointer; border: 1px solid #ffd700; background: rgba(255, 215, 0, 0.1); margin-bottom: 1rem;">
-                    <input type="checkbox" id="side-bet-toggle" onclick="if(window.updateJackpotLinks) window.updateJackpotLinks()" style="width: 20px; height: 20px; cursor: pointer;">
-                    <span style="font-weight: 700; color: #ffd700;">¡SÍ, QUIERO EL JACKPOT!</span>
+                <label id="jackpot-toggle-label" class="payment-method-card" style="display: flex; align-items: center; justify-content: center; gap: 1rem; cursor: pointer; border: 2px solid #ffd700; background: rgba(255, 215, 0, 0.1); margin-bottom: 1rem; padding: 1rem; border-radius: 8px; transition: all 0.3s ease;">
+                    <input type="checkbox" id="side-bet-toggle" onclick="if(window.updateJackpotLinks) window.updateJackpotLinks()" style="width: 25px; height: 25px; cursor: pointer; accent-color: #ffd700;">
+                    <span style="font-weight: 900; color: #ffd700; font-size: 1.1rem; text-transform: uppercase;">¡SÍ, QUIERO EL JACKPOT!</span>
                 </label>
 
-                <div id="side-bet-input" style="display: none;">
-                    <p style="font-size: 0.8rem; margin-bottom: 0.5rem;">CANTIDAD DE GOLES ESTIMADA:</p>
-                    <input type="number" id="total-goles-pick" placeholder="Ej: 24" style="width: 100px; text-align: center; border: 1px solid #ffd700; background: rgba(0,0,0,0.3); color: #fff; padding: 5px; border-radius: 4px;">
+                <div id="side-bet-input" style="display: none; border-top: 1px dashed #ffd700; padding-top: 1rem; margin-top: 0.5rem;">
+                    <p style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;">ESTIMA EL TOTAL DE GOLES (EJ: 24):</p>
+                    <input type="number" id="total-goles-pick" min="1" placeholder="?" style="width: 120px; font-size: 1.5rem; font-weight: 900; text-align: center; border: 2px solid #ffd700; background: #000; color: #ffd700; padding: 10px; border-radius: 8px; outline: none; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);">
                 </div>
             </div>
             
             <div class="payment-grid">
-                <a href="https://www.paypal.com/ncp/payment/BDGD5KMEYE8" target="_blank" id="pay-paypal" class="btn-payment btn-paypal" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                <a href="https://www.paypal.com/ncp/payment/BDGD5MXKMEYE8" target="_blank" id="pay-paypal" class="btn-payment btn-paypal" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                     PAYPAL / VENMO / APPLE PAY
                 </a>
                 <button type="button" id="pay-zelle" class="btn-payment btn-zelle">
@@ -151,16 +151,19 @@
             </div>
 
             <!-- Zelle Instructions (Hidden by default) -->
-            <div id="zelle-instructions" class="upload-container" style="display: none; margin-top: 2rem;">
-                <p style="color: #fff; font-weight: 700; margin-bottom: 0.5rem;">ZELLE INFO:</p>
-                <p style="color: var(--primary-neon); font-size: 1.2rem; font-weight: 900;">Jhonatan Magdaleno Tovar</p>
-                <p style="color: var(--primary-neon); font-size: 1.2rem; font-weight: 900;">205-767-1414</p>
+            <div id="zelle-instructions" class="upload-container" style="display: none; margin-top: 2rem; border: 1px solid var(--primary-neon); padding: 1.5rem; border-radius: 10px; background: rgba(0, 245, 255, 0.05);">
+                <p style="color: #fff; font-weight: 700; margin-bottom: 0.5rem;">DATOS ZELLE:</p>
+                <p style="color: var(--primary-neon); font-size: 1.4rem; font-weight: 900;">Jhonatan Magdaleno</p>
+                <p style="color: var(--primary-neon); font-size: 1.4rem; font-weight: 900;">205-767-1414</p>
                 
                 <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-                    <p style="color: var(--secondary-magenta); font-size: 0.8rem; font-weight: 800; margin-bottom: 1rem;">
-                        SUBE CAPTURA DEL COMPROBANTE:
+                    <p style="color: var(--accent-yellow); font-size: 0.9rem; font-weight: 800; margin-bottom: 1rem;">
+                        <i class="fas fa-camera"></i> SUBE TU COMPROBANTE AQUÍ:
                     </p>
-                    <input type="file" id="zelle-screenshot" accept="image/*" style="background: none; border: none; font-size: 0.8rem;">
+                    <div style="position: relative;">
+                        <input type="file" id="zelle-screenshot" accept="image/*" style="width: 100%; color: #fff; font-size: 0.8rem;">
+                        <span id="upload-status" style="display: block; margin-top: 0.5rem; font-size: 0.75rem; font-weight: 700;"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -188,7 +191,7 @@
 </footer>
 
 
-    <script src="assets/js/main.js?v=MOBILE_MODERN_v20"></script>
-    <script src="assets/js/data-engine.js?v=ULTIMATE_FIX_v15"></script>
+    <script src="assets/js/main.js?v=ULTRA_FIX_35"></script>
+    <script src="assets/js/data-engine.js?v=ULTRA_FIX_35"></script>
 </body>
 </html>

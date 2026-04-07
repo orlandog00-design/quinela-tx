@@ -8,8 +8,8 @@ class DataEngine {
         // Read URL (CSV)
         this.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMObz19KSMXtEAcdhQzfXb8yPcMLPDjKwZjy0PyC15coaU2JLD--RwVFMoXH1BuMvc_htUoVtHos2a/pub?output=csv";
 
-        // Write URL (Google Apps Script - Multi-Tab + Drive API v3.4)
-        this.scriptUrl = "https://script.google.com/macros/s/AKfycbzHXPxXnJ3O2-JgQfVEuFd4jRC5rQ1XcN-_9UEy6wKTkuyaiuEKjFYuOl_tqUnfmLCK/exec";
+        // Write URL (Google Apps Script - Robust Sync v3.5)
+        this.scriptUrl = "https://script.google.com/macros/s/AKfycbyH6qIzVrEDDW3PnsGzrAR31TN0gNJoJUSFLJsulgzOXTrSdAGKogr0LbpURNX9V5at/exec";
 
         // Official Liga MX Team Logos (FotMob CDN - High Reliability)
         const logoBase = "https://images.fotmob.com/image_resources/logo/teamlogo/";
@@ -171,17 +171,19 @@ class DataEngine {
 
     async registerParticipant(data) {
         try {
-            // Initial status is PENDIENTE until the admin verifies the funds
+            // Include all robust fields for v3.5
             const payload = {
                 nombre: data.nombre,
+                telefono: data.telefono,
                 predicciones: data.predicciones,
-                poblacion: data.telefono,
+                jackpot_goles: data.jackpot_goles || "NO",
                 metodo_pago: data.metodo_pago || "NONE",
-                status: "PENDIENTE",
-                jornada: this.selectedJornadaId
+                status: data.status || "PENDIENTE",
+                jornada: data.jornada || this.selectedJornadaId,
+                comprobante_base64: data.comprobante_base64 || ""
             };
 
-            // Note: Google Apps Script requires no-cors for simple browser POSTs
+            // Using fetch with no-cors for Google Apps Script POST
             await fetch(this.scriptUrl, {
                 method: "POST",
                 mode: "no-cors",

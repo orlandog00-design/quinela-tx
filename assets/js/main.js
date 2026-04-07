@@ -39,7 +39,8 @@ window.updateJackpotLinks = function() {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("SPORTS KING ENGINE: ACTIVE_VERSION_v3.5");
     // --- MOBILE MENU TOGGLE ---
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
@@ -208,23 +209,48 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPicks = document.querySelectorAll('.choice-box.active').length;
         const matchesComplete = totalPicks === 9;
         
-        if ((paypalDone || zelleDone) && matchesComplete) {
-            finalizeBtn.disabled = false;
-            finalizeBtn.style.opacity = "1";
-            finalizeBtn.style.cursor = "pointer";
-            lockMsg.style.color = "var(--primary-neon)";
-            lockMsg.textContent = "✓ ¡Todo listo! Finaliza ahora.";
-        } else {
-            finalizeBtn.disabled = true;
-            finalizeBtn.style.opacity = "0.5";
-            if (!matchesComplete) {
-                lockMsg.textContent = `⚠ Selecciona todos los partidos (${totalPicks}/9)`;
-                lockMsg.style.color = "var(--secondary-magenta)";
+        // Jackpot Validation
+        const sideBetActive = sideBetToggle && sideBetToggle.checked;
+        const totalGolesInput = document.getElementById('total-goles-pick');
+        const goalsValue = totalGolesInput ? totalGolesInput.value.trim() : "";
+        const goalsValid = sideBetActive ? (goalsValue !== "" && parseInt(goalsValue) > 0) : true;
+        
+        const isReady = (paypalDone || zelleDone) && matchesComplete && goalsValid;
+
+        if (finalizeBtn) {
+            if (isReady) {
+                finalizeBtn.disabled = false;
+                finalizeBtn.style.opacity = "1";
+                finalizeBtn.style.cursor = "pointer";
+                lockMsg.style.color = "var(--primary-neon)";
+                lockMsg.textContent = "✓ ¡Listo! Todos los datos están completos.";
             } else {
-                lockMsg.textContent = "⚠ Pendiente: Confirma tu pago arriba.";
-                lockMsg.style.color = "var(--accent-yellow)";
+                finalizeBtn.disabled = true;
+                finalizeBtn.style.opacity = "0.5";
+                finalizeBtn.style.cursor = "not-allowed";
+                
+                if (!matchesComplete) {
+                    lockMsg.textContent = `⚠ Selecciona todos los partidos (${totalPicks}/9)`;
+                    lockMsg.style.color = "var(--secondary-magenta)";
+                } else if (!(paypalDone || zelleDone)) {
+                    lockMsg.textContent = "⚠ Pendiente: Selecciona y confirma tu pago arriba.";
+                    lockMsg.style.color = "var(--accent-yellow)";
+                } else if (!goalsValid) {
+                    lockMsg.textContent = "⚠ ¡FALTA EL TOTAL DE GOLES DEL JACKPOT!";
+                    lockMsg.style.color = "#ffd700";
+                    if (totalGolesInput) totalGolesInput.style.borderColor = "red";
+                }
             }
         }
+    }
+
+    // Listener for goals input to re-validate
+    const goalsInput = document.getElementById('total-goles-pick');
+    if (goalsInput) {
+        goalsInput.addEventListener('input', () => {
+            goalsInput.style.borderColor = "#ffd700";
+            checkStatus();
+        });
     }
 
     // 5. Payment Listeners
@@ -252,9 +278,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (zelleScreenshot) {
         zelleScreenshot.addEventListener('change', () => {
+            const statusEl = document.getElementById('upload-status');
             if (zelleScreenshot.files.length > 0) {
-                zelleDone = true;
-                checkStatus();
+                if (statusEl) {
+                    statusEl.textContent = "⌛ PROCESANDO IMAGEN...";
+                    statusEl.style.color = "var(--accent-yellow)";
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                    zelleDone = true;
+                    if (statusEl) {
+                        statusEl.textContent = "✅ IMAGEN LISTA";
+                        statusEl.style.color = "var(--primary-neon)";
+                    }
+                    checkStatus();
+                };
+                reader.readAsDataURL(zelleScreenshot.files[0]);
             }
         });
     }
