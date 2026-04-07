@@ -8,8 +8,8 @@ class DataEngine {
         // Read URL (CSV)
         this.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMObz19KSMXtEAcdhQzfXb8yPcMLPDjKwZjy0PyC15coaU2JLD--RwVFMoXH1BuMvc_htUoVtHos2a/pub?output=csv";
 
-        // Write URL (Google Apps Script - Master Final v4.0)
-        this.scriptUrl = "https://script.google.com/macros/s/AKfycbzNirXOAfLXnDLie06G8yDQqJZHGBmfVjI8FSUTQ1PhAGpS6oTUd8Ke_jJGTn4-LtuB/exec";
+        // Write URL (Google Apps Script - Master Final v4.1 ID FIXED)
+        this.scriptUrl = "https://script.google.com/macros/s/AKfycbzyPY_kvQIKw8-Ih-vGqRY6ov9w3X9xy3qr9hSV8xsB7u1FOFupoWi1cZi4BQOUmBcJ/exec";
 
         // Official Liga MX Team Logos (FotMob CDN - High Reliability)
         const logoBase = "https://images.fotmob.com/image_resources/logo/teamlogo/";
