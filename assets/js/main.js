@@ -273,13 +273,30 @@ document.addEventListener('DOMContentLoaded', () => {
             finalizeBtn.textContent = "REGISTRANDO...";
             finalizeBtn.disabled = true;
 
+            // Handle Payment Proof File (Base64)
+            let base64Image = "";
+            if (paymentMethod === "ZELLE" && zelleScreenshot.files.length > 0) {
+                const file = zelleScreenshot.files[0];
+                try {
+                    base64Image = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                } catch (err) {
+                    console.error("Error reading image:", err);
+                }
+            }
+
             const success = await engine.registerParticipant({
                 nombre: name,
                 telefono: phone,
                 predicciones: picks,
                 jackpot_goles: sideBetActive ? totalGoles : "NO",
                 metodo_pago: paymentMethod,
-                status: "PAGADO"
+                status: "PAGADO",
+                comprobante_base64: base64Image
             });
 
             if (success) {
