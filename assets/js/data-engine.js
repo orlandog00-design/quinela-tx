@@ -99,77 +99,39 @@ class DataEngine {
         if (jornadaId) this.selectedJornadaId = parseInt(jornadaId);
         
         try {
-            // Cache-buster to ensure mobile browsers get FRESH data from the sheet
-            const cacheBustedUrl = this.url + (this.url.includes("?") ? "&" : "?") + "t=" + Date.now();
-            const response = await fetch(cacheBustedUrl);
-            const csvText = await response.text();
+            // Using Apps Script JSON API instead of CSV for 100% reliability with Multi-Tabs
+            const apiUrl = `${this.scriptUrl}?action=fetch&jornada=${this.selectedJornadaId}&t=${Date.now()}`;
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) throw new Error("API Fetch failed");
+            
+            const rawData = await response.json();
 
-            // Simple CSV to JSON Parser
-            const lines = csvText.split('\n');
-            const rawData = lines.slice(1).map(line => {
-                const values = line.split(',');
-                if (values.length < 2) return null;
-                
-                // Smarter Jornada ID Mapping:
-                // 1. Explicit Column F (index 5)
-                // 2. If empty, check Date in Column H (index 7)
-                // 3. Fallback: Default to J13 for legacy, active for new
-                let jId = 13;
-                const activeId = this.getActiveJornada().id;
-                
-                if (values[5] && values[5].trim() !== "") {
-                    jId = parseInt(values[5].trim());
-                } else if (values[7]) {
-                    // Try to guess by date: J14 registrations start after Apr 6, 2026
-                    const regDate = new Date(values[7].trim());
-                    if (!isNaN(regDate.getTime()) && regDate > new Date("2026-04-06")) {
-                        jId = activeId; 
-                    }
-                } else if (values[0] && values[0].length > 0 && !values[0].includes("RESULTADOS_OFICIALES")) {
-                    // If no date and no JID, but it's a person, put it in J13 for safety
-                    // unless today is J14 and we just want them to appear
-                    jId = activeId;
-                }
-                
-                return {
-                    nombre: values[0]?.trim(),
-                    predicciones: values[1]?.trim(),
-                    pts: parseInt(values[2]?.trim()) || 0,
-                    telefono: values[3]?.trim(),
-                    status: values[4]?.trim() || "PENDIENTE",
-                    jornadaId: jId
-                };
-            }).filter(item => item !== null && item.nombre !== "");
-
-            // Debugging the sync
-            console.log(`Syncing Jornada ${this.selectedJornadaId}. Found ${rawData.filter(i => i.jornadaId === this.selectedJornadaId).length} participants.`);
-
-            // Filter by selected Jornada
-            const filteredData = rawData.filter(item => item.jornadaId === this.selectedJornadaId);
-
-            // Find the Official Results row (Always check the whole sheet for the latest)
+            // Find System Rows (Official results are stored in the spreadsheet too)
+            // They should be rows where 'nombre' is special
             const officialRow = rawData.find(item =>
-                item.nombre.toUpperCase() === "RESULTADOS_OFICIALES" ||
-                item.nombre.toUpperCase() === "OFFICIAL_RESULTS"
+                item.nombre && (item.nombre.toUpperCase() === "RESULTADOS_OFICIALES" || item.nombre.toUpperCase() === "OFFICIAL_RESULTS")
             );
 
-            // Find the Live Scores row
             const liveScoresRow = rawData.find(item =>
-                item.nombre.toUpperCase() === "MARCADORES_VIVO" ||
-                item.nombre.toUpperCase() === "LIVE_SCORES"
+                item.nombre && (item.nombre.toUpperCase() === "MARCADORES_VIVO" || item.nombre.toUpperCase() === "LIVE_SCORES")
             );
 
             this.officialPicks = officialRow ? officialRow.predicciones.split('-') : [];
             this.liveScores = liveScoresRow ? liveScoresRow.predicciones.split('-') : [];
 
-            // Attempt to dynamically sync from ESPN to populate missing live scores and official results
-            // Note: We sync the active one from the calendar, or the selected one if it's in calendar
+            // Attempt to dynamically sync from ESPN
             const targetJornada = this.LIGA_CALENDAR.find(j => j.id === this.selectedJornadaId) || this.getActiveJornada();
             await this.syncFotMob(targetJornada);
 
             // Process participants for the SELECTED jornada
-            this.data = filteredData.filter(item => item !== officialRow && item !== liveScoresRow).map(p => {
-                const pPicks = p.predicciones.split('-');
+            this.data = rawData.filter(item => 
+                item.nombre && 
+                item.nombre.toUpperCase() !== "RESULTADOS_OFICIALES" && 
+                item.nombre.toUpperCase() !== "MARCADORES_VIVO" &&
+                item.nombre.toUpperCase() !== "MARCADOR_JACKPOT_GOLES"
+            ).map(p => {
+                const pPicks = p.predicciones ? p.predicciones.split('-') : [];
                 let computedPts = 0;
                 const status = pPicks.map((pick, index) => {
                     const official = this.officialPicks[index];
@@ -181,18 +143,21 @@ class DataEngine {
 
                 return {
                     ...p,
+                    pts: parseInt(p.puntos) || 0,
                     computedPts: computedPts,
                     pickStatus: status,
-                    paymentStatus: p.status
+                    paymentStatus: p.status || "PENDIENTE",
+                    jackpot_goles: p.jackpot_goles || p.jackpot_goles // Mapping for J14 new field
                 };
             });
 
             // Sort by Points (Highest first)
             this.data.sort((a, b) => (b.pts || b.computedPts) - (a.pts || a.computedPts));
 
+            console.log(`Synced Jornada ${this.selectedJornadaId}. Participants: ${this.data.length}`);
             return this.data;
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error("Error fetching data from API:", error);
             return [];
         }
     }
