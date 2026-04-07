@@ -108,9 +108,28 @@ class DataEngine {
             const lines = csvText.split('\n');
             const rawData = lines.slice(1).map(line => {
                 const values = line.split(',');
-                if (values.length < 3) return null;
+                if (values.length < 2) return null;
                 
-                const jId = parseInt(values[5]?.trim()) || 13; // Default to 13 for legacy data
+                // Smarter Jornada ID Mapping:
+                // 1. Explicit Column F (index 5)
+                // 2. If empty, check Date in Column H (index 7)
+                // 3. Fallback: Default to J13 for legacy, active for new
+                let jId = 13;
+                const activeId = this.getActiveJornada().id;
+                
+                if (values[5] && values[5].trim() !== "") {
+                    jId = parseInt(values[5].trim());
+                } else if (values[7]) {
+                    // Try to guess by date: J14 registrations start after Apr 6, 2026
+                    const regDate = new Date(values[7].trim());
+                    if (!isNaN(regDate.getTime()) && regDate > new Date("2026-04-06")) {
+                        jId = activeId; 
+                    }
+                } else if (values[0] && values[0].length > 0 && !values[0].includes("RESULTADOS_OFICIALES")) {
+                    // If no date and no JID, but it's a person, put it in J13 for safety
+                    // unless today is J14 and we just want them to appear
+                    jId = activeId;
+                }
                 
                 return {
                     nombre: values[0]?.trim(),
@@ -121,6 +140,9 @@ class DataEngine {
                     jornadaId: jId
                 };
             }).filter(item => item !== null && item.nombre !== "");
+
+            // Debugging the sync
+            console.log(`Syncing Jornada ${this.selectedJornadaId}. Found ${rawData.filter(i => i.jornadaId === this.selectedJornadaId).length} participants.`);
 
             // Filter by selected Jornada
             const filteredData = rawData.filter(item => item.jornadaId === this.selectedJornadaId);
