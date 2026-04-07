@@ -147,7 +147,7 @@ class DataEngine {
                     computedPts: computedPts,
                     pickStatus: status,
                     paymentStatus: p.status || "PENDIENTE",
-                    jackpot_goles: p.jackpot_goles || p.jackpot_goles // Mapping for J14 new field
+                    jackpot_goles: p.jackpot_goles || "NO"
                 };
             });
 
