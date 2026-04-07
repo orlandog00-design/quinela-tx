@@ -700,3 +700,91 @@ footer p {
     #nav-menu { position: static; width: auto; height: auto; background: none; border: none; box-shadow: none; display: block; }
     .nav-links { flex-direction: row; }
 }
+
+/* --- LEADERBOARD MATRIX & STICKY UTILITIES (RESTORATION v3.8) --- */
+.matrix-wrapper {
+    overflow-x: auto;
+    background: rgba(10, 11, 30, 0.6);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    margin-top: 1.5rem;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+#results-table {
+    width: max-content;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#results-table th, #results-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* STICKY COLUMNS (POS & NAME) */
+.sticky-col-rank {
+    position: sticky;
+    left: 0;
+    z-index: 100 !important;
+    background: #0d0e23 !important;
+    min-width: 60px;
+    text-align: center;
+    border-right: 1px solid rgba(0, 245, 255, 0.1);
+}
+
+.sticky-col-name {
+    position: sticky;
+    left: 60px;
+    z-index: 100 !important;
+    background: #0d0e23 !important;
+    min-width: 180px;
+    text-align: left;
+    font-weight: 800;
+    border-right: 2px solid var(--primary-neon);
+}
+
+/* Table Design Overhaul */
+#results-table thead th {
+    background: rgba(0, 245, 255, 0.05);
+    color: var(--primary-neon);
+    font-weight: 900;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 1.5rem 1rem;
+}
+
+/* Match Logo Pairs */
+.logo-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 60px;
+}
+
+.logo-pair img { width: 28px; height: 28px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+.vs-text { font-size: 0.65rem; font-weight: 900; opacity: 0.8; }
+
+/* Pick Dots (The Chips) */
+.pick-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.pick-dot.correct { background: linear-gradient(135deg, #00ff00, #008000); color: #000; box-shadow: 0 0 15px rgba(0, 255, 0, 0.4); }
+.pick-dot.incorrect { background: rgba(255, 0, 255, 0.1); border: 1px solid var(--secondary-magenta); color: var(--secondary-magenta); }
+.pick-dot.pending { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.4); }
+
+/* Rank Special */
+.rank-gold { color: var(--accent-yellow) !important; text-shadow: 0 0 10px var(--accent-yellow); font-weight: 900; }

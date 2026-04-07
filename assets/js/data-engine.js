@@ -8,8 +8,8 @@ class DataEngine {
         // Read URL (CSV)
         this.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMObz19KSMXtEAcdhQzfXb8yPcMLPDjKwZjy0PyC15coaU2JLD--RwVFMoXH1BuMvc_htUoVtHos2a/pub?output=csv";
 
-        // Write URL (Google Apps Script - Master Final v4.1 ID FIXED)
-        this.scriptUrl = "https://script.google.com/macros/s/AKfycbzyPY_kvQIKw8-Ih-vGqRY6ov9w3X9xy3qr9hSV8xsB7u1FOFupoWi1cZi4BQOUmBcJ/exec";
+        // Write URL (Google Apps Script - Robust Sync v3.8 FINAL)
+        this.scriptUrl = "https://script.google.com/macros/s/AKfycbz9Wy8QF0gKi7ugWONBn9mfEaZEaY5h7xl3IJUvTnlj4WFJ7bQIKFWHLiISGlQDVelK/exec";
 
         // Official Liga MX Team Logos (FotMob CDN - High Reliability)
         const logoBase = "https://images.fotmob.com/image_resources/logo/teamlogo/";
@@ -124,49 +124,30 @@ class DataEngine {
             const targetJornada = this.LIGA_CALENDAR.find(j => j.id === this.selectedJornadaId) || this.getActiveJornada();
             await this.syncFotMob(targetJornada);
 
-            this.data = rawData.filter(item => {
-                const n = (item.nombre || item.participante || "").toString().toUpperCase();
-                
-                // Detect Jornada (from 'jornada' header or fallback)
-                const itemJornada = parseInt(item.jornada || 0);
-                const targetJornada = parseInt(this.selectedJornadaId);
-                
-                if (n === "" || ["RESULTADOS_OFICIALES", "MARCADORES_VIVO", "SYSTEM"].includes(n)) return false;
-
-                // STRICT FILTERING: If a jornada is specified, it MUST match the selected one.
-                // If J13 is closed and J14 is selected, hide J13 people.
-                if (itemJornada > 0) {
-                    return itemJornada === targetJornada;
-                }
-                
-                // Fallback for older records without a jornada column (legacy)
-                return targetJornada === 13; // Assume legacy rows were from the first week (J13)
-            }).map(p => {
-                // Detect picks from varied header names
-                const rawPicks = p.picks || p.predicciones || p['los 9 pronósticos'] || "";
-                const pPicks = rawPicks.toString().split('-');
-                
-                // Detect status
-                const pStatus = (p.status || p.estatus || p.estado || "PAGADO").toString().toUpperCase();
-
+            // Process participants for the SELECTED jornada
+            this.data = rawData.filter(item => 
+                item.nombre && 
+                item.nombre.toUpperCase() !== "RESULTADOS_OFICIALES" && 
+                item.nombre.toUpperCase() !== "MARCADORES_VIVO" &&
+                item.nombre.toUpperCase() !== "MARCADOR_JACKPOT_GOLES"
+            ).map(p => {
+                const pPicks = p.predicciones ? p.predicciones.split('-') : [];
                 let computedPts = 0;
                 const status = pPicks.map((pick, index) => {
                     const official = this.officialPicks[index];
                     if (!official || official === "" || official === "?") return 'pending';
-                    const isCorrect = pick.trim().toUpperCase() === official.trim().toUpperCase();
+                    const isCorrect = pick.toUpperCase() === official.toUpperCase();
                     if (isCorrect) computedPts++;
                     return isCorrect ? 'correct' : 'incorrect';
                 });
 
                 return {
                     ...p,
-                    nombre: p.nombre || p.participante,
-                    pts: parseInt(p.puntos || p.pts) || computedPts,
+                    pts: parseInt(p.puntos) || 0,
                     computedPts: computedPts,
                     pickStatus: status,
-                    paymentStatus: pStatus,
-                    whatsapp: p.whatsapp || p.telefono,
-                    jackpot_goles: p.jackpot_goles || p['goles jackpot'] || "NO"
+                    paymentStatus: p.status || "PENDIENTE",
+                    jackpot_goles: p.jackpot_goles || "NO"
                 };
             });
 
@@ -193,13 +174,12 @@ class DataEngine {
             // Include all robust fields for v3.5
             const payload = {
                 nombre: data.nombre,
-                whatsapp: data.telefono, // Mapping for backend
-                picks: data.predicciones, // Mapping for backend
+                telefono: data.telefono,
+                predicciones: data.predicciones,
                 jackpot_goles: data.jackpot_goles || "NO",
-                pago_metodo: data.metodo_pago || "NONE", // Mapping for backend
+                metodo_pago: data.metodo_pago || "NONE",
                 status: data.status || "PENDIENTE",
                 jornada: data.jornada || this.selectedJornadaId,
-                total_pago: data.jackpot_goles !== "NO" ? "$13 USD / $225 MXN" : "$10 USD / $175 MXN",
                 comprobante_base64: data.comprobante_base64 || ""
             };
 
@@ -286,11 +266,7 @@ class DataEngine {
                         .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
                         .replace("atletico de san luis", "atletico san luis")
                         .replace("guadalajara", "chivas")
-                        .replace("monterrey", "rayados")
-                        .replace("u.n.a.m.", "pumas")
-                        .replace("univerisdad nacional", "pumas")
-                        .replace("club america", "america")
-                        .replace("deportivo toluca", "toluca");
+                        .replace("monterrey", "rayados");
                 };
 
                 let computedOfficialPicks = [];
