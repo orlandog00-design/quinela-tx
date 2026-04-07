@@ -41,6 +41,7 @@ window.updateJackpotLinks = function() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("SPORTS KING ENGINE: ACTIVE_VERSION_v3.5");
+    // alert("SPORTS KING v3.5: ARREGLO DE SINCRONIZACIÓN ACTIVADO ✅");
     // --- MOBILE MENU TOGGLE ---
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');

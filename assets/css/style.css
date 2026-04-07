@@ -235,12 +235,14 @@ td:last-child { border-radius: 0 12px 12px 0; }
 }
 
 .btn-zelle {
-    background: #6d1ed1;
+    background: #28a745; /* GREEN FOR SYNC CONFIRMATION */
     color: white;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
 }
 
 .btn-zelle:hover {
-    box-shadow: 0 0 15px #6d1ed1;
+    background: #218838;
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.6);
 }
 
 .upload-container {
