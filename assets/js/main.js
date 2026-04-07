@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const prizeUsdEl = document.getElementById('home-prize-usd');
         const prizeMxnEl = document.getElementById('home-prize-mxn');
 
-        if (paidParticipants < 5) {
+        if (paidParticipants < 1) {
             if (prizeUsdEl) prizeUsdEl.textContent = "TBD";
             if (prizeMxnEl) prizeMxnEl.textContent = "Esperando participantes...";
         } else {

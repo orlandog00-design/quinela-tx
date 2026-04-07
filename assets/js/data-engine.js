@@ -174,12 +174,13 @@ class DataEngine {
             // Include all robust fields for v3.5
             const payload = {
                 nombre: data.nombre,
-                telefono: data.telefono,
-                predicciones: data.predicciones,
+                whatsapp: data.telefono, // Mapping for backend
+                picks: data.predicciones, // Mapping for backend
                 jackpot_goles: data.jackpot_goles || "NO",
-                metodo_pago: data.metodo_pago || "NONE",
+                pago_metodo: data.metodo_pago || "NONE", // Mapping for backend
                 status: data.status || "PENDIENTE",
                 jornada: data.jornada || this.selectedJornadaId,
+                total_pago: data.jackpot_goles !== "NO" ? "$13 USD / $225 MXN" : "$10 USD / $175 MXN",
                 comprobante_base64: data.comprobante_base64 || ""
             };
 
@@ -266,7 +267,11 @@ class DataEngine {
                         .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
                         .replace("atletico de san luis", "atletico san luis")
                         .replace("guadalajara", "chivas")
-                        .replace("monterrey", "rayados");
+                        .replace("monterrey", "rayados")
+                        .replace("u.n.a.m.", "pumas")
+                        .replace("univerisdad nacional", "pumas")
+                        .replace("club america", "america")
+                        .replace("deportivo toluca", "toluca");
                 };
 
                 let computedOfficialPicks = [];
